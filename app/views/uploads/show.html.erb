@@ -1,0 +1,97 @@
+<h1>Upload Details</h1>
+
+<% if notice %>
+  <p style="color: green;"><%= notice %></p>
+<% end %>
+
+<% if alert %>
+  <p style="color: red;"><%= alert %></p>
+<% end %>
+
+<% if @upload.file.attached? %>
+  <p><strong>Filename:</strong> <%= @upload.file.filename %></p>
+
+  <%= button_to "Run Analysis", analyze_upload_path(@upload), method: :post %>
+<% else %>
+  <p>No file attached.</p>
+<% end %>
+
+<hr>
+
+<% if @upload.analysis_result.present? %>
+  <h2>Detected Subscriptions</h2>
+
+  <% subscriptions = @upload.analysis_result["subscriptions"] || [] %>
+  <% needs_review = @upload.analysis_result["needs_review"] || [] %>
+
+  <% if subscriptions.any? %>
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Merchant</th>
+          <th>Normalized</th>
+          <th>Frequency</th>
+          <th>Avg Amount</th>
+          <th>Last Paid</th>
+          <th>Next Expected</th>
+          <th>Confidence</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% subscriptions.each do |sub| %>
+          <tr>
+            <td><%= sub["merchant"] %></td>
+            <td><%= sub["merchant_normalized"] %></td>
+            <td><%= sub["frequency"] %></td>
+            <td><%= sub["avg_amount"] %></td>
+            <td><%= sub["last_paid"] %></td>
+            <td><%= sub["next_expected"] %></td>
+            <td><%= sub["confidence"] %></td>
+            <td><%= sub["evidence"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No subscriptions detected yet.</p>
+  <% end %>
+
+  <h2>Needs Review</h2>
+
+  <% if needs_review.any? %>
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Merchant</th>
+          <th>Normalized</th>
+          <th>Frequency</th>
+          <th>Avg Amount</th>
+          <th>Last Paid</th>
+          <th>Next Expected</th>
+          <th>Confidence</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% needs_review.each do |sub| %>
+          <tr>
+            <td><%= sub["merchant"] %></td>
+            <td><%= sub["merchant_normalized"] %></td>
+            <td><%= sub["frequency"] %></td>
+            <td><%= sub["avg_amount"] %></td>
+            <td><%= sub["last_paid"] %></td>
+            <td><%= sub["next_expected"] %></td>
+            <td><%= sub["confidence"] %></td>
+            <td><%= sub["evidence"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No low-confidence items.</p>
+  <% end %>
+<% end %>
+
+<br>
+<%= link_to "Upload another file", root_path %>

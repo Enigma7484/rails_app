@@ -1,0 +1,16 @@
+<h1>Bills & Subscriptions Agent</h1>
+
+<p>Upload a CSV file to analyze subscriptions.</p>
+
+<%= form_with model: @upload, local: true do |form| %>
+  <div>
+    <%= form.label :file, "Choose CSV file" %><br>
+    <%= form.file_field :file %>
+  </div>
+
+  <br>
+
+  <div>
+    <%= form.submit "Upload File" %>
+  </div>
+<% end %>
