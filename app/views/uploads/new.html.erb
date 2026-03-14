@@ -1,16 +1,26 @@
-<h1>Bills & Subscriptions Agent</h1>
+<div class="page-container">
+  <h1 class="page-title">Bills & Subscriptions Agent</h1>
+  <p class="page-subtitle">
+    Upload a CSV or PDF statement to detect recurring subscriptions and review parsed transactions.
+  </p>
 
-<p>Upload a CSV file to analyze subscriptions.</p>
+  <div class="section-card" style="max-width: 760px;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Upload File</h2>
+        <p class="section-note">Start with a CSV for best accuracy, then try PDF support.</p>
+      </div>
+    </div>
 
-<%= form_with model: @upload, local: true do |form| %>
-  <div>
-    <%= form.label :file, "Choose CSV file" %><br>
-    <%= form.file_field :file %>
+    <%= form_with model: @upload, local: true do |form| %>
+      <div style="margin-bottom: 16px;">
+        <%= form.label :file, "Choose CSV or PDF", class: "small-text" %><br><br>
+        <%= form.file_field :file %>
+      </div>
+
+      <div class="button-row">
+        <%= form.submit "Upload File" %>
+      </div>
+    <% end %>
   </div>
-
-  <br>
-
-  <div>
-    <%= form.submit "Upload File" %>
-  </div>
-<% end %>
+</div>

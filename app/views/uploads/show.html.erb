@@ -1,192 +1,247 @@
-<h1>Upload Details</h1>
+<div class="page-container">
+  <h1 class="page-title">Bills & Subscriptions Agent</h1>
+  <p class="page-subtitle">
+    Review parsed transactions, detected subscriptions, and manual corrections.
+  </p>
 
-<% if notice %>
-  <p style="color: #22c55e; font-weight: bold;"><%= notice %></p>
-<% end %>
+  <% if notice %>
+    <div class="alert alert-success"><%= notice %></div>
+  <% end %>
 
-<% if alert %>
-  <p style="color: #ef4444; font-weight: bold;"><%= alert %></p>
-<% end %>
+  <% if alert %>
+    <div class="alert alert-error"><%= alert %></div>
+  <% end %>
 
-<% if @upload.file.attached? %>
-  <p><strong>Filename:</strong> <%= @upload.file.filename %></p>
-  <%= button_to "Run Analysis", analyze_upload_path(@upload), method: :post %>
-<% else %>
-  <p>No file attached.</p>
-<% end %>
-
-<hr>
-
-<% if @upload.analysis_result.present? %>
-  <% subscriptions = @upload.analysis_result["subscriptions"] || [] %>
-  <% needs_review = @upload.analysis_result["needs_review"] || [] %>
-  <% parsed_rows = @upload.analysis_result["parsed_rows"] || [] %>
-  <% row_count = @upload.analysis_result["row_count"] || 0 %>
-
-  <% monthly_total = subscriptions.select { |s| s["frequency"] == "monthly" }.sum { |s| s["avg_amount"].to_f } %>
-  <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
-  <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
-
-  <h2>Summary</h2>
-  <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
-    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
-      <strong>Parsed Rows</strong>
-      <p style="font-size: 24px; margin: 8px 0;"><%= row_count %></p>
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Upload Details</h2>
+        <p class="section-note">Analyze your uploaded file and inspect the extracted rows.</p>
+      </div>
     </div>
 
-    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
-      <strong>Detected Subscriptions</strong>
-      <p style="font-size: 24px; margin: 8px 0;"><%= subscriptions.length %></p>
-    </div>
+    <% if @upload.file.attached? %>
+      <div class="file-meta">
+        <div class="meta-pill">
+          <strong>Filename:</strong> <%= @upload.file.filename %>
+        </div>
+        <div class="meta-pill">
+          <strong>Type:</strong> <%= @upload.file.content_type || "Unknown" %>
+        </div>
+      </div>
 
-    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
-      <strong>Estimated Monthly Total</strong>
-      <p style="font-size: 24px; margin: 8px 0;">$<%= "%.2f" % monthly_total %></p>
-    </div>
-
-    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
-      <strong>Highest Subscription</strong>
-      <% if highest_subscription %>
-        <p style="margin: 8px 0;"><%= highest_subscription["merchant"] %></p>
-        <p>$<%= "%.2f" % highest_subscription["avg_amount"].to_f %></p>
-      <% else %>
-        <p style="margin: 8px 0;">N/A</p>
-      <% end %>
-    </div>
-
-    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
-      <strong>Next Upcoming Charge</strong>
-      <% if next_upcoming %>
-        <p style="margin: 8px 0;"><%= next_upcoming["merchant"] %></p>
-        <p><%= next_upcoming["next_expected"] %></p>
-      <% else %>
-        <p style="margin: 8px 0;">N/A</p>
-      <% end %>
-    </div>
+      <div class="button-row">
+        <%= button_to "Run Analysis", analyze_upload_path(@upload), method: :post %>
+        <%= button_to "Recalculate from Edited Rows", recalculate_upload_path(@upload), method: :post, class: "btn-secondary" %>
+        <%= link_to "Upload another file", root_path, class: "btn-link" %>
+      </div>
+    <% else %>
+      <p class="empty-state">No file attached.</p>
+    <% end %>
   </div>
 
-  <h2>Detected Subscriptions</h2>
+  <% if @upload.analysis_result.present? %>
+    <% subscriptions = @upload.analysis_result["subscriptions"] || [] %>
+    <% needs_review = @upload.analysis_result["needs_review"] || [] %>
+    <% parsed_rows = @upload.analysis_result["parsed_rows"] || [] %>
+    <% row_count = @upload.analysis_result["row_count"] || 0 %>
 
-  <% if subscriptions.any? %>
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
-      <thead>
-        <tr>
-          <th>Merchant</th>
-          <th>Normalized</th>
-          <th>Frequency</th>
-          <th>Avg Amount</th>
-          <th>Last Paid</th>
-          <th>Next Expected</th>
-          <th>Confidence</th>
-          <th>Evidence</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% subscriptions.each do |sub| %>
-          <tr>
-            <td><%= sub["merchant"] %></td>
-            <td><%= sub["merchant_normalized"] %></td>
-            <td><%= sub["frequency"] %></td>
-            <td><%= sub["avg_amount"] %></td>
-            <td><%= sub["last_paid"] %></td>
-            <td><%= sub["next_expected"] %></td>
-            <td>
-              <% confidence = sub["confidence"].to_f %>
-              <% color =
-                if confidence >= 0.85
-                  "#16a34a"
-                elsif confidence >= 0.7
-                  "#eab308"
-                else
-                  "#ef4444"
-                end
-              %>
-              <span style="color: <%= color %>; font-weight: bold;">
-                <%= sub["confidence"] %>
-              </span>
-            </td>
-            <td><%= sub["evidence"] %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No subscriptions detected yet.</p>
-  <% end %>
+    <% monthly_total = subscriptions.select { |s| s["frequency"] == "monthly" }.sum { |s| s["avg_amount"].to_f } %>
+    <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
+    <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
 
-  <h2>Needs Review</h2>
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Summary</h2>
+          <p class="section-note">High-level metrics from the latest analysis.</p>
+        </div>
+      </div>
 
-  <% if needs_review.any? %>
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
-      <thead>
-        <tr>
-          <th>Merchant</th>
-          <th>Normalized</th>
-          <th>Frequency</th>
-          <th>Avg Amount</th>
-          <th>Last Paid</th>
-          <th>Next Expected</th>
-          <th>Confidence</th>
-          <th>Evidence</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% needs_review.each do |sub| %>
-          <tr>
-            <td><%= sub["merchant"] %></td>
-            <td><%= sub["merchant_normalized"] %></td>
-            <td><%= sub["frequency"] %></td>
-            <td><%= sub["avg_amount"] %></td>
-            <td><%= sub["last_paid"] %></td>
-            <td><%= sub["next_expected"] %></td>
-            <td>
-              <span style="color: #ef4444; font-weight: bold;">
-                <%= sub["confidence"] %>
-              </span>
-            </td>
-            <td><%= sub["evidence"] %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No low-confidence items.</p>
-  <% end %>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-label">Parsed Rows</div>
+          <div class="summary-value"><%= row_count %></div>
+          <div class="summary-subtext">Transactions extracted from the file</div>
+        </div>
 
-  <h2>Parsed Transactions</h2>
+        <div class="summary-card">
+          <div class="summary-label">Detected Subscriptions</div>
+          <div class="summary-value"><%= subscriptions.length %></div>
+          <div class="summary-subtext">Recurring items identified by the agent</div>
+        </div>
 
-  <% if parsed_rows.any? %>
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Merchant</th>
-          <th>Normalized</th>
-          <th>Amount</th>
-          <th>Currency</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% parsed_rows.each_with_index do |row, index| %>
-          <tr>
-            <td><%= row["date"] %></td>
-            <td><%= row["merchant"] %></td>
-            <td>
-              <%= form_with url: update_parsed_row_path(@upload, index), method: :patch, local: true do |form| %>
-                <%= form.text_field :merchant_normalized, value: row["merchant_normalized"], style: "width: 160px;" %>
-                <%= form.submit "Save" %>
+        <div class="summary-card">
+          <div class="summary-label">Estimated Monthly Total</div>
+          <div class="summary-value">$<%= "%.2f" % monthly_total %></div>
+          <div class="summary-subtext">Sum of monthly recurring charges</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">Highest Subscription</div>
+          <% if highest_subscription %>
+            <div class="summary-value">$<%= "%.2f" % highest_subscription["avg_amount"].to_f %></div>
+            <div class="summary-subtext"><%= highest_subscription["merchant"] %></div>
+          <% else %>
+            <div class="summary-value">—</div>
+            <div class="summary-subtext">No subscription found</div>
+          <% end %>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">Next Upcoming Charge</div>
+          <% if next_upcoming %>
+            <div class="summary-value"><%= next_upcoming["next_expected"] %></div>
+            <div class="summary-subtext"><%= next_upcoming["merchant"] %></div>
+          <% else %>
+            <div class="summary-value">—</div>
+            <div class="summary-subtext">No upcoming charge available</div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Detected Subscriptions</h2>
+          <p class="section-note">High-confidence recurring charges identified by the agent.</p>
+        </div>
+      </div>
+
+      <% if subscriptions.any? %>
+        <div class="table-wrap">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Merchant</th>
+                <th>Normalized</th>
+                <th>Frequency</th>
+                <th>Avg Amount</th>
+                <th>Last Paid</th>
+                <th>Next Expected</th>
+                <th>Confidence</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% subscriptions.each do |sub| %>
+                <tr>
+                  <td><strong><%= sub["merchant"] %></strong></td>
+                  <td><%= sub["merchant_normalized"] %></td>
+                  <td><span class="badge badge-blue"><%= sub["frequency"] %></span></td>
+                  <td>$<%= "%.2f" % sub["avg_amount"].to_f %></td>
+                  <td><%= sub["last_paid"] %></td>
+                  <td><%= sub["next_expected"] %></td>
+                  <td>
+                    <% confidence = sub["confidence"].to_f %>
+                    <% badge_class =
+                      if confidence >= 0.85
+                        "badge-green"
+                      elsif confidence >= 0.7
+                        "badge-yellow"
+                      else
+                        "badge-red"
+                      end
+                    %>
+                    <span class="badge <%= badge_class %>"><%= sub["confidence"] %></span>
+                  </td>
+                  <td class="small-text"><%= sub["evidence"] %></td>
+                </tr>
               <% end %>
-            </td>
-            <td><%= row["amount"] %></td>
-            <td><%= row["currency"] || "-" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No parsed transactions found.</p>
-  <% end %>
-<% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="empty-state">No subscriptions detected yet.</p>
+      <% end %>
+    </div>
 
-<br>
-<%= link_to "Upload another file", root_path %>
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Needs Review</h2>
+          <p class="section-note">Lower-confidence recurring candidates that may need manual correction.</p>
+        </div>
+      </div>
+
+      <% if needs_review.any? %>
+        <div class="table-wrap">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Merchant</th>
+                <th>Normalized</th>
+                <th>Frequency</th>
+                <th>Avg Amount</th>
+                <th>Last Paid</th>
+                <th>Next Expected</th>
+                <th>Confidence</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% needs_review.each do |sub| %>
+                <tr>
+                  <td><strong><%= sub["merchant"] %></strong></td>
+                  <td><%= sub["merchant_normalized"] %></td>
+                  <td><span class="badge badge-blue"><%= sub["frequency"] %></span></td>
+                  <td>$<%= "%.2f" % sub["avg_amount"].to_f %></td>
+                  <td><%= sub["last_paid"] %></td>
+                  <td><%= sub["next_expected"] %></td>
+                  <td><span class="badge badge-red"><%= sub["confidence"] %></span></td>
+                  <td class="small-text"><%= sub["evidence"] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="empty-state">No low-confidence items.</p>
+      <% end %>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Parsed Transactions</h2>
+          <p class="section-note">Review extracted rows and manually correct normalized merchant names.</p>
+        </div>
+      </div>
+
+      <% if parsed_rows.any? %>
+        <div class="table-wrap">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Merchant</th>
+                <th>Normalized Merchant</th>
+                <th>Amount</th>
+                <th>Currency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% parsed_rows.each_with_index do |row, index| %>
+                <tr>
+                  <td><%= row["date"] %></td>
+                  <td><strong><%= row["merchant"] %></strong></td>
+                  <td>
+                    <%= form_with url: update_parsed_row_path(@upload, index), method: :patch, local: true, html: { class: "inline-form" } do |form| %>
+                      <%= form.text_field :merchant_normalized, value: row["merchant_normalized"] %>
+                      <%= form.submit "Save" %>
+                    <% end %>
+                  </td>
+                  <td>$<%= "%.2f" % row["amount"].to_f %></td>
+                  <td><%= row["currency"] || "-" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="empty-state">No parsed transactions found.</p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -4,4 +4,5 @@ Rails.application.routes.draw do
   resources :uploads, only: [:new, :create, :show]
   post "uploads/:id/analyze", to: "uploads#analyze", as: :analyze_upload
   patch "uploads/:id/update_parsed_row/:row_index", to: "uploads#update_parsed_row", as: :update_parsed_row
+  post "uploads/:id/recalculate", to: "uploads#recalculate", as: :recalculate_upload
 end

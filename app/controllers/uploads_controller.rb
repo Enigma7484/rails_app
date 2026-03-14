@@ -89,7 +89,7 @@ class UploadsController < ApplicationController
     return
   end
 
-  parsed_rows[row_index]["merchant_normalized"] = params[:merchant_normalized]
+  parsed_rows[row_index]["merchant_normalized"] = params[:merchant_normalized].to_s.strip
 
   updated_result = @upload.analysis_result
   updated_result["parsed_rows"] = parsed_rows
@@ -97,6 +97,43 @@ class UploadsController < ApplicationController
   @upload.update!(analysis_result: updated_result)
 
   redirect_to @upload, notice: "Parsed row updated successfully."
+end
+
+def recalculate
+  @upload = Upload.find(params[:id])
+
+  unless @upload.analysis_result.present?
+    redirect_to @upload, alert: "No analysis data found."
+    return
+  end
+
+  parsed_rows = @upload.analysis_result["parsed_rows"] || []
+
+  connection = Faraday.new(url: "http://localhost:8000") do |f|
+    f.request :json
+    f.response :raise_error
+    f.adapter Faraday.default_adapter
+  end
+
+  response = connection.post("/recalculate") do |req|
+    req.headers["Content-Type"] = "application/json"
+    req.body = { parsed_rows: parsed_rows }
+  end
+
+  parsed = JSON.parse(response.body)
+
+  updated_result = @upload.analysis_result
+  updated_result["subscriptions"] = parsed["subscriptions"] || []
+  updated_result["needs_review"] = parsed["needs_review"] || []
+  updated_result["parsed_rows"] = parsed["parsed_rows"] || parsed_rows
+  updated_result["row_count"] = parsed["row_count"] || parsed_rows.length
+  updated_result["error"] = parsed["error"] if parsed.key?("error")
+
+  @upload.update!(analysis_result: updated_result)
+
+  redirect_to @upload, notice: "Subscriptions recalculated successfully."
+rescue => e
+  redirect_to @upload, alert: "Error while recalculating: #{e.message}"
 end
 
 end
