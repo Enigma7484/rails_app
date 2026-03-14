@@ -72,4 +72,31 @@ class UploadsController < ApplicationController
     tempfile&.close
     tempfile&.unlink
   end
+
+  def update_parsed_row
+  @upload = Upload.find(params[:id])
+
+  unless @upload.analysis_result.present?
+    redirect_to @upload, alert: "No analysis data found."
+    return
+  end
+
+  parsed_rows = @upload.analysis_result["parsed_rows"] || []
+  row_index = params[:row_index].to_i
+
+  if row_index < 0 || row_index >= parsed_rows.length
+    redirect_to @upload, alert: "Invalid row index."
+    return
+  end
+
+  parsed_rows[row_index]["merchant_normalized"] = params[:merchant_normalized]
+
+  updated_result = @upload.analysis_result
+  updated_result["parsed_rows"] = parsed_rows
+
+  @upload.update!(analysis_result: updated_result)
+
+  redirect_to @upload, notice: "Parsed row updated successfully."
+end
+
 end

@@ -1,16 +1,15 @@
 <h1>Upload Details</h1>
 
 <% if notice %>
-  <p style="color: green;"><%= notice %></p>
+  <p style="color: #22c55e; font-weight: bold;"><%= notice %></p>
 <% end %>
 
 <% if alert %>
-  <p style="color: red;"><%= alert %></p>
+  <p style="color: #ef4444; font-weight: bold;"><%= alert %></p>
 <% end %>
 
 <% if @upload.file.attached? %>
   <p><strong>Filename:</strong> <%= @upload.file.filename %></p>
-
   <%= button_to "Run Analysis", analyze_upload_path(@upload), method: :post %>
 <% else %>
   <p>No file attached.</p>
@@ -19,13 +18,57 @@
 <hr>
 
 <% if @upload.analysis_result.present? %>
-  <h2>Detected Subscriptions</h2>
-
   <% subscriptions = @upload.analysis_result["subscriptions"] || [] %>
   <% needs_review = @upload.analysis_result["needs_review"] || [] %>
+  <% parsed_rows = @upload.analysis_result["parsed_rows"] || [] %>
+  <% row_count = @upload.analysis_result["row_count"] || 0 %>
+
+  <% monthly_total = subscriptions.select { |s| s["frequency"] == "monthly" }.sum { |s| s["avg_amount"].to_f } %>
+  <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
+  <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
+
+  <h2>Summary</h2>
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
+    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
+      <strong>Parsed Rows</strong>
+      <p style="font-size: 24px; margin: 8px 0;"><%= row_count %></p>
+    </div>
+
+    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
+      <strong>Detected Subscriptions</strong>
+      <p style="font-size: 24px; margin: 8px 0;"><%= subscriptions.length %></p>
+    </div>
+
+    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
+      <strong>Estimated Monthly Total</strong>
+      <p style="font-size: 24px; margin: 8px 0;">$<%= "%.2f" % monthly_total %></p>
+    </div>
+
+    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
+      <strong>Highest Subscription</strong>
+      <% if highest_subscription %>
+        <p style="margin: 8px 0;"><%= highest_subscription["merchant"] %></p>
+        <p>$<%= "%.2f" % highest_subscription["avg_amount"].to_f %></p>
+      <% else %>
+        <p style="margin: 8px 0;">N/A</p>
+      <% end %>
+    </div>
+
+    <div style="border: 1px solid #444; padding: 16px; min-width: 220px; border-radius: 8px;">
+      <strong>Next Upcoming Charge</strong>
+      <% if next_upcoming %>
+        <p style="margin: 8px 0;"><%= next_upcoming["merchant"] %></p>
+        <p><%= next_upcoming["next_expected"] %></p>
+      <% else %>
+        <p style="margin: 8px 0;">N/A</p>
+      <% end %>
+    </div>
+  </div>
+
+  <h2>Detected Subscriptions</h2>
 
   <% if subscriptions.any? %>
-    <table border="1" cellpadding="8">
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
       <thead>
         <tr>
           <th>Merchant</th>
@@ -47,7 +90,21 @@
             <td><%= sub["avg_amount"] %></td>
             <td><%= sub["last_paid"] %></td>
             <td><%= sub["next_expected"] %></td>
-            <td><%= sub["confidence"] %></td>
+            <td>
+              <% confidence = sub["confidence"].to_f %>
+              <% color =
+                if confidence >= 0.85
+                  "#16a34a"
+                elsif confidence >= 0.7
+                  "#eab308"
+                else
+                  "#ef4444"
+                end
+              %>
+              <span style="color: <%= color %>; font-weight: bold;">
+                <%= sub["confidence"] %>
+              </span>
+            </td>
             <td><%= sub["evidence"] %></td>
           </tr>
         <% end %>
@@ -60,7 +117,7 @@
   <h2>Needs Review</h2>
 
   <% if needs_review.any? %>
-    <table border="1" cellpadding="8">
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
       <thead>
         <tr>
           <th>Merchant</th>
@@ -82,7 +139,11 @@
             <td><%= sub["avg_amount"] %></td>
             <td><%= sub["last_paid"] %></td>
             <td><%= sub["next_expected"] %></td>
-            <td><%= sub["confidence"] %></td>
+            <td>
+              <span style="color: #ef4444; font-weight: bold;">
+                <%= sub["confidence"] %>
+              </span>
+            </td>
             <td><%= sub["evidence"] %></td>
           </tr>
         <% end %>
@@ -90,6 +151,40 @@
     </table>
   <% else %>
     <p>No low-confidence items.</p>
+  <% end %>
+
+  <h2>Parsed Transactions</h2>
+
+  <% if parsed_rows.any? %>
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Merchant</th>
+          <th>Normalized</th>
+          <th>Amount</th>
+          <th>Currency</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% parsed_rows.each_with_index do |row, index| %>
+          <tr>
+            <td><%= row["date"] %></td>
+            <td><%= row["merchant"] %></td>
+            <td>
+              <%= form_with url: update_parsed_row_path(@upload, index), method: :patch, local: true do |form| %>
+                <%= form.text_field :merchant_normalized, value: row["merchant_normalized"], style: "width: 160px;" %>
+                <%= form.submit "Save" %>
+              <% end %>
+            </td>
+            <td><%= row["amount"] %></td>
+            <td><%= row["currency"] || "-" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No parsed transactions found.</p>
   <% end %>
 <% end %>
 
