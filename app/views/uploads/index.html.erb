@@ -1,0 +1,145 @@
+<div class="page-container">
+  <% total_monthly = @total_monthly || 0 %>
+  <% total_count = @total_count || 0 %>
+  <% top_category = @top_category %>
+
+  <div class="section-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">View past uploads, reopen analyses, and continue reviewing subscriptions.</p>
+    </div>
+    <div class="button-row">
+      <%= link_to "New Upload", new_upload_path, class: "btn" %>
+    </div>
+  </div>
+
+  <div class="kpi-row" style="margin-bottom: 24px;">
+    <div class="kpi-card">
+      <div class="kpi-title">Total Saved Subscriptions</div>
+      <div class="kpi-value"><%= total_count %></div>
+      <div class="kpi-subtext">Subscriptions persisted across your uploads.</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Estimated Monthly Spend</div>
+      <div class="kpi-value">$<%= "%.2f" % total_monthly %></div>
+      <div class="kpi-subtext">Monthly recurring total across the current view.</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Top Category</div>
+      <div class="kpi-value"><%= top_category || "—" %></div>
+      <div class="kpi-subtext">Highest spending category in the current view.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Filter Dashboard</h2>
+        <p class="section-note">View insights across all uploads or narrow results to one upload.</p>
+      </div>
+    </div>
+
+    <%= form_with url: uploads_path, method: :get, local: true, html: { class: "inline-form" } do |form| %>
+      <%= form.label :upload_id, "Select Upload", class: "small-text" %>
+      <%= form.select :upload_id,
+            options_for_select(
+              [["All Uploads", ""]] + @uploads.map { |u| ["##{u.id} - #{u.file.attached? ? u.file.filename.to_s : 'No file'}", u.id] },
+              @selected_upload_id
+            ),
+            {},
+            { style: "min-width: 320px;" } %>
+      <%= form.submit "Apply Filter", class: "btn" %>
+      <%= link_to "Clear", uploads_path, class: "btn btn-secondary" %>
+    <% end %>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Portfolio Insights</h2>
+        <p class="section-note">Quick view of recurring spend and subscription mix.</p>
+      </div>
+    </div>
+
+    <% if @category_spend.present? || @frequency_counts.present? || @trend_by_upload_date.present? %>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="section-title" style="font-size: 18px; margin-bottom: 12px;">Monthly Spend by Category</div>
+          <%= pie_chart @category_spend, height: "320px", donut: true %>
+        </div>
+
+        <div class="summary-card">
+          <div class="section-title" style="font-size: 18px; margin-bottom: 12px;">Subscriptions by Frequency</div>
+          <%= column_chart @frequency_counts, height: "320px" %>
+        </div>
+
+        <div class="summary-card">
+          <div class="section-title" style="font-size: 18px; margin-bottom: 12px;">Recurring Spend by Upload Date</div>
+          <%= line_chart @trend_by_upload_date, height: "320px" %>
+        </div>
+      </div>
+    <% else %>
+      <div class="note-box">
+        No subscription history yet. Upload and analyze a file to populate charts.
+      </div>
+    <% end %>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Upload History</h2>
+        <p class="section-note">Open previous analyses, review parsed results, or delete an upload.</p>
+      </div>
+    </div>
+
+    <% if @uploads.any? %>
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Filename</th>
+              <th>Created</th>
+              <th>Subscriptions</th>
+              <th>Parsed Rows</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @uploads.each do |upload| %>
+              <% result = upload.analysis_result || {} %>
+              <tr>
+                <td><%= upload.id %></td>
+                <td><strong><%= upload.file.attached? ? upload.file.filename.to_s : "No file" %></strong></td>
+                <td><%= upload.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+                <td><span class="badge badge-blue"><%= (result["subscriptions"] || []).length %></span></td>
+                <td><%= result["row_count"] || 0 %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Open", upload_path(upload), class: "btn-link" %>
+                    <%= button_to "Delete",
+                          upload_path(upload),
+                          method: :delete,
+                          data: { turbo_confirm: "Delete this upload and all its saved subscriptions?" },
+                          class: "btn btn-secondary" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state-card">
+        <h3>No uploads yet</h3>
+        <p class="empty-state-text">Upload a CSV or PDF statement to start analyzing subscriptions.</p>
+        <div class="button-row">
+          <%= link_to "Create First Upload", new_upload_path, class: "btn" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

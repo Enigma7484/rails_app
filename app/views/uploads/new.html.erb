@@ -1,25 +1,28 @@
 <div class="page-container">
-  <h1 class="page-title">Bills & Subscriptions Agent</h1>
-  <p class="page-subtitle">
-    Upload a CSV or PDF statement to detect recurring subscriptions and review parsed transactions.
-  </p>
+  <div class="section-header">
+    <div>
+      <h1 class="page-title">New Upload</h1>
+      <p class="page-subtitle">Upload a CSV or PDF statement to detect recurring subscriptions.</p>
+    </div>
+  </div>
 
   <div class="section-card" style="max-width: 760px;">
     <div class="section-header">
       <div>
         <h2 class="section-title">Upload File</h2>
-        <p class="section-note">Start with a CSV for best accuracy, then try PDF support.</p>
+        <p class="section-note">CSV gives the best accuracy. PDF works well for text-based statements.</p>
       </div>
     </div>
 
     <%= form_with model: @upload, local: true do |form| %>
-      <div style="margin-bottom: 16px;">
+      <div style="margin-bottom: 18px;">
         <%= form.label :file, "Choose CSV or PDF", class: "small-text" %><br><br>
         <%= form.file_field :file %>
       </div>
 
       <div class="button-row">
-        <%= form.submit "Upload File" %>
+        <%= form.submit "Upload File", class: "btn" %>
+        <%= link_to "Back to Dashboard", uploads_path, class: "btn btn-secondary" %>
       </div>
     <% end %>
   </div>

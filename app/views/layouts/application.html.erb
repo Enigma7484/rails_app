@@ -1,29 +1,48 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Rails App" %></title>
+    <title>BillsAgent</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Rails App">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <%= link_to "BillsAgent", root_path, class: "navbar-brand" %>
+
+        <div class="navbar-links">
+          <% if user_signed_in? %>
+            <%= link_to "Dashboard", uploads_path, class: "navbar-link" %>
+            <%= link_to "New Upload", new_upload_path, class: "navbar-link navbar-link-pill" %>
+
+            <%= form_with url: destroy_user_session_path, method: :delete, local: true, html: { class: "navbar-signout-form" } do %>
+              <button type="submit" class="navbar-link-button">Sign Out</button>
+            <% end %>
+          <% else %>
+            <%= link_to "Sign In", new_user_session_path, class: "navbar-link" %>
+            <%= link_to "Register", new_user_registration_path, class: "navbar-link navbar-link-pill" %>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <% if notice %>
+      <div class="flash-wrap">
+        <div class="alert alert-success"><%= notice %></div>
+      </div>
+    <% end %>
+
+    <% if alert %>
+      <div class="flash-wrap">
+        <div class="alert alert-error"><%= alert %></div>
+      </div>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

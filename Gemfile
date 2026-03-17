@@ -67,3 +67,6 @@ end
 
 gem "faraday"
 gem "faraday-multipart"
+gem "devise"
+gem "chartkick"
+gem "groupdate"

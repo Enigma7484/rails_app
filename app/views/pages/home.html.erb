@@ -1,0 +1,42 @@
+<div class="page-container">
+  <div class="hero-card">
+    <div class="hero-badge">LangGraph + Rails + FastAPI</div>
+    <h1 class="hero-title">Detect recurring bills and subscriptions from CSV or PDF statements.</h1>
+    <p class="hero-subtitle">
+      Upload a statement, review parsed transactions, correct merchant names, recalculate recurring charges,
+      export to CSV or calendar, and enrich subscriptions with AI.
+    </p>
+
+    <div class="button-row">
+      <% if user_signed_in? %>
+        <%= link_to "Go to Dashboard", uploads_path, class: "btn" %>
+        <%= link_to "New Upload", new_upload_path, class: "btn-secondary" %>
+      <% else %>
+        <%= link_to "Get Started", new_user_registration_path, class: "btn" %>
+        <%= link_to "Sign In", new_user_session_path, class: "btn-secondary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h3>Multi-format Ingestion</h3>
+      <p>Analyze both CSV files and text-based PDF statements.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>Human Review Loop</h3>
+      <p>Correct parsed merchant names and recalculate results instantly.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>Actionable Output</h3>
+      <p>Export subscriptions to CSV or recurring calendar reminders.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>AI Enrichment</h3>
+      <p>Add categories and short descriptions using rules or LLM support.</p>
+    </div>
+  </div>
+</div>
