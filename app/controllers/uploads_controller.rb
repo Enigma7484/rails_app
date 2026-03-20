@@ -87,7 +87,7 @@ class UploadsController < ApplicationController
     tempfile.write(downloaded_file)
     tempfile.rewind
 
-    connection = Faraday.new(url: "http://localhost:8000") do |f|
+    connection = Faraday.new(url: ENV.fetch("AGENT_SERVICE_URL")) do |f|
       f.request :multipart
       f.request :url_encoded
       f.adapter Faraday.default_adapter
@@ -155,7 +155,7 @@ def recalculate
 
   parsed_rows = @upload.analysis_result["parsed_rows"] || []
 
-  connection = Faraday.new(url: "http://localhost:8000") do |f|
+  connection = Faraday.new(url: ENV.fetch("AGENT_SERVICE_URL")) do |f|
     f.request :json
     f.response :raise_error
     f.adapter Faraday.default_adapter
@@ -287,7 +287,7 @@ def enrich_subscriptions
 
   subscriptions = @upload.analysis_result["subscriptions"] || []
 
-  connection = Faraday.new(url: "http://localhost:8000") do |f|
+  connection = Faraday.new(url: ENV.fetch("AGENT_SERVICE_URL")) do |f|
     f.request :json
     f.response :raise_error
     f.adapter Faraday.default_adapter
