@@ -2,8 +2,6 @@
 set -o errexit
 
 bundle install
-bin/rails assets:precompile
-bin/rails assets:clean
-
-# Keep migrations here if you're not using a pre-deploy command
-bin/rails db:migrate
+bundle exec rails assets:precompile
+bundle exec rails assets:clean
+bundle exec rails db:migrate
