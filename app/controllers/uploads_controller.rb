@@ -13,6 +13,10 @@ class UploadsController < ApplicationController
     @uploads = current_user.uploads.order(created_at: :desc)
     @selected_upload_id = params[:upload_id].presence
 
+    if @selected_upload_id.present? && !@uploads.exists?(id: @selected_upload_id)
+      @selected_upload_id = nil
+    end
+
     subscriptions_scope = Subscription.joins(:upload).where(uploads: { user_id: current_user.id })
 
     if @selected_upload_id.present?
@@ -67,7 +71,7 @@ class UploadsController < ApplicationController
     @upload = current_user.uploads.find(params[:id])
     @upload.destroy!
 
-    redirect_to uploads_path, notice: "Upload deleted successfully."
+    redirect_to uploads_path, notice: "Upload deleted successfully.", status: :see_other
   end
 
   def analyze
