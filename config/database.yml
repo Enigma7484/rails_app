@@ -20,5 +20,21 @@ test:
   database: bills_agent_test
 
 production:
-  <<: *default
-  url: <%= ENV["DATABASE_URL"] %>
+  primary: &primary_production
+    <<: *default
+    url: <%= ENV["DATABASE_URL"] %>
+
+  cache:
+    <<: *primary_production
+    url: <%= ENV["DATABASE_URL"] %>
+    migrations_paths: db/cache_migrate
+
+  queue:
+    <<: *primary_production
+    url: <%= ENV["DATABASE_URL"] %>
+    migrations_paths: db/queue_migrate
+
+  cable:
+    <<: *primary_production
+    url: <%= ENV["DATABASE_URL"] %>
+    migrations_paths: db/cable_migrate
