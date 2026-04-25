@@ -71,3 +71,5 @@ gem "devise"
 gem "chartkick"
 gem "groupdate"
 gem "csv"
+
+gem "dotenv-rails", groups: [:development, :test]

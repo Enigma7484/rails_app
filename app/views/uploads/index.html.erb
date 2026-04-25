@@ -105,6 +105,7 @@
               <th>Created</th>
               <th>Subscriptions</th>
               <th>Parsed Rows</th>
+              <th>Warnings</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -117,6 +118,7 @@
                 <td><%= upload.created_at.strftime("%Y-%m-%d %H:%M") %></td>
                 <td><span class="badge badge-blue"><%= (result["subscriptions"] || []).length %></span></td>
                 <td><%= result["row_count"] || 0 %></td>
+                <td><%= (result["warnings"] || []).length %></td>
                 <td>
                   <div class="inline-actions">
                     <%= link_to "Open", upload_path(upload), class: "btn-link" %>

@@ -1,8 +1,12 @@
 <div class="page-container">
-  <% subscriptions = (@upload.analysis_result || {})["subscriptions"] || [] %>
-  <% needs_review = (@upload.analysis_result || {})["needs_review"] || [] %>
-  <% parsed_rows = (@upload.analysis_result || {})["parsed_rows"] || [] %>
-  <% row_count = (@upload.analysis_result || {})["row_count"] || 0 %>
+  <% analysis_result = @upload.analysis_result || {} %>
+  <% subscriptions = analysis_result["subscriptions"] || [] %>
+  <% needs_review = analysis_result["needs_review"] || [] %>
+  <% parsed_rows = analysis_result["parsed_rows"] || [] %>
+  <% warnings = analysis_result["warnings"] || [] %>
+  <% detected_schema = analysis_result["detected_schema"] || {} %>
+  <% row_count = analysis_result["row_count"] || 0 %>
+  <% file_type = analysis_result["file_type"] || "unknown" %>
   <% monthly_total = subscriptions.select { |s| s["frequency"] == "monthly" }.sum { |s| s["avg_amount"].to_f } %>
   <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
   <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
@@ -10,9 +14,7 @@
   <div class="page-topbar">
     <div>
       <h1 class="page-title">Upload Analysis</h1>
-      <p class="page-subtitle">
-        Review extracted rows, correct merchant normalization, and manage recurring subscription results.
-      </p>
+      <p class="page-subtitle">Review extracted rows, parsing notes, and recurring bill results.</p>
     </div>
 
     <div class="inline-actions">
@@ -32,6 +34,7 @@
     <div class="file-meta">
       <div class="meta-pill"><strong>Filename:</strong> <%= @upload.file.attached? ? @upload.file.filename.to_s : "No file" %></div>
       <div class="meta-pill"><strong>Content Type:</strong> <%= @upload.file&.content_type || "Unknown" %></div>
+      <div class="meta-pill"><strong>Detected File Type:</strong> <%= file_type %></div>
       <div class="meta-pill"><strong>Upload ID:</strong> <%= @upload.id %></div>
       <div class="meta-pill"><strong>Created:</strong> <%= @upload.created_at.strftime("%Y-%m-%d %H:%M") %></div>
     </div>
@@ -88,6 +91,57 @@
   </div>
 
   <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Parsing Notes</h2>
+        <p class="section-note">Helpful messages about how the file was interpreted.</p>
+      </div>
+    </div>
+
+    <% if warnings.any? %>
+      <div class="pill-row">
+        <% warnings.each do |warning| %>
+          <span class="soft-pill"><%= warning %></span>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="note-box">No parsing warnings for this upload.</div>
+    <% end %>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Detected Schema</h2>
+        <p class="section-note">How uploaded columns were mapped into the standard transaction format.</p>
+      </div>
+    </div>
+
+    <% if detected_schema.present? %>
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Standard Field</th>
+              <th>Detected Input Column</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% detected_schema.each do |key, value| %>
+              <tr>
+                <td><strong><%= key %></strong></td>
+                <td><%= value.presence || "—" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="note-box">No schema mapping information available for this upload.</div>
+    <% end %>
+  </div>
+
+  <div class="section-card">
     <div class="table-section-title">
       <div>
         <h2 class="section-title">Detected Subscriptions</h2>
@@ -106,12 +160,14 @@
             <tr>
               <th>Merchant</th>
               <th>Category</th>
+              <th>Bill Type</th>
               <th>Frequency</th>
               <th>Avg Amount</th>
               <th>Last Paid</th>
               <th>Next Expected</th>
               <th>Confidence</th>
               <th>Description</th>
+              <th>Evidence</th>
             </tr>
           </thead>
           <tbody>
@@ -122,36 +178,31 @@
                   <div class="merchant-meta"><%= sub["merchant_normalized"] %></div>
                 </td>
                 <td><%= sub["category"] || "-" %></td>
+                <td><%= sub["bill_type"] || "-" %></td>
                 <td><span class="badge badge-blue"><%= sub["frequency"] %></span></td>
                 <td>$<%= "%.2f" % sub["avg_amount"].to_f %></td>
                 <td><%= sub["last_paid"] %></td>
                 <td><%= sub["next_expected"] %></td>
                 <td>
                   <% confidence = sub["confidence"].to_f %>
-                  <% badge_class =
-                    if confidence >= 0.85
-                      "badge-green"
-                    elsif confidence >= 0.7
-                      "badge-yellow"
-                    else
-                      "badge-red"
-                    end
-                  %>
+                  <% badge_class = if confidence >= 0.85
+                    "badge-green"
+                  elsif confidence >= 0.7
+                    "badge-yellow"
+                  else
+                    "badge-red"
+                  end %>
                   <span class="badge <%= badge_class %>"><%= sub["confidence"] %></span>
                 </td>
-                <td class="small-text">
-                  <div><%= sub["description"] || "-" %></div>
-                  <div class="merchant-meta" style="margin-top:6px;"><%= sub["evidence"] %></div>
-                </td>
+                <td class="small-text"><%= sub["description"] || "-" %></td>
+                <td class="small-text"><%= sub["evidence_summary"] || sub["evidence"] || "-" %></td>
               </tr>
             <% end %>
           </tbody>
         </table>
       </div>
     <% else %>
-      <div class="note-box">
-        No subscriptions detected yet. Try running analysis, correcting normalized merchants, then recalculate.
-      </div>
+      <div class="note-box">No subscriptions detected yet. Try running analysis, correcting normalized merchants, then recalculate.</div>
     <% end %>
   </div>
 
@@ -192,16 +243,14 @@
                 <td><%= sub["last_paid"] %></td>
                 <td><%= sub["next_expected"] %></td>
                 <td><span class="badge badge-red"><%= sub["confidence"] %></span></td>
-                <td class="small-text"><%= sub["evidence"] %></td>
+                <td class="small-text"><%= sub["evidence_summary"] || sub["evidence"] || "-" %></td>
               </tr>
             <% end %>
           </tbody>
         </table>
       </div>
     <% else %>
-      <div class="note-box">
-        No low-confidence items right now.
-      </div>
+      <div class="note-box">No low-confidence items right now.</div>
     <% end %>
   </div>
 
@@ -238,9 +287,7 @@
             <% parsed_rows.each_with_index do |row, index| %>
               <tr>
                 <td><%= row["date"] %></td>
-                <td class="merchant-cell">
-                  <strong><%= row["merchant"] %></strong>
-                </td>
+                <td class="merchant-cell"><strong><%= row["merchant"] %></strong></td>
                 <td>
                   <%= form_with url: update_parsed_row_path(@upload, index), method: :patch, local: true, html: { class: "inline-form" } do |form| %>
                     <%= form.text_field :merchant_normalized, value: row["merchant_normalized"] %>
@@ -255,9 +302,7 @@
         </table>
       </div>
     <% else %>
-      <div class="note-box">
-        No parsed transactions found yet. Run analysis first.
-      </div>
+      <div class="note-box">No parsed transactions found yet. Run analysis first.</div>
     <% end %>
   </div>
 </div>
