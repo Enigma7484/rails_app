@@ -7,9 +7,11 @@
   <% detected_schema = analysis_result["detected_schema"] || {} %>
   <% row_count = analysis_result["row_count"] || 0 %>
   <% file_type = analysis_result["file_type"] || "unknown" %>
+  <% analysis_error = analysis_result["error"].to_s %>
   <% monthly_total = subscriptions.select { |s| s["frequency"] == "monthly" }.sum { |s| s["avg_amount"].to_f } %>
   <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
   <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
+  <% persisted_by_key = (@persisted_subscriptions || []).index_by { |s| [s.merchant_normalized.to_s.downcase.strip, "%.2f" % s.avg_amount.to_f].join("|") } %>
 
   <div class="page-topbar">
     <div>
@@ -30,6 +32,10 @@
         <p class="section-note">This upload is the source for the current analysis and export actions.</p>
       </div>
     </div>
+
+    <% if analysis_error.present? %>
+      <div class="alert alert-error"><%= analysis_error %></div>
+    <% end %>
 
     <div class="file-meta">
       <div class="meta-pill"><strong>Filename:</strong> <%= @upload.file.attached? ? @upload.file.filename.to_s : "No file" %></div>
@@ -168,10 +174,13 @@
               <th>Confidence</th>
               <th>Description</th>
               <th>Evidence</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <% subscriptions.each do |sub| %>
+              <% persisted_subscription = persisted_by_key[[sub["merchant_normalized"].to_s.downcase.strip, "%.2f" % sub["avg_amount"].to_f].join("|")] %>
               <tr>
                 <td class="merchant-cell">
                   <strong><%= sub["merchant"] %></strong>
@@ -196,6 +205,18 @@
                 </td>
                 <td class="small-text"><%= sub["description"] || "-" %></td>
                 <td class="small-text"><%= sub["evidence_summary"] || sub["evidence"] || "-" %></td>
+                <td><span class="soft-pill"><%= persisted_subscription&.status || "detected" %></span></td>
+                <td>
+                  <% if persisted_subscription %>
+                    <div class="inline-actions">
+                      <%= button_to "Confirm", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "confirmed" } }, class: "btn btn-secondary" %>
+                      <%= button_to "Ignore", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "ignored" } }, class: "btn btn-secondary" %>
+                      <%= button_to "Watch", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "watchlist" } }, class: "btn btn-secondary" %>
+                    </div>
+                  <% else %>
+                    <span class="small-text">Run analysis to save actions.</span>
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </tbody>

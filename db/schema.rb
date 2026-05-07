@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_06_000200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_120000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "merchant_aliases", force: :cascade do |t|
+    t.string "canonical_name", null: false
+    t.datetime "created_at", null: false
+    t.string "raw_name", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "raw_name"], name: "index_merchant_aliases_on_user_id_and_raw_name", unique: true
+    t.index ["user_id"], name: "index_merchant_aliases_on_user_id"
+  end
+
   create_table "subscriptions", force: :cascade do |t|
     t.decimal "avg_amount"
     t.string "bill_type"
@@ -56,8 +66,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_120000) do
     t.string "merchant"
     t.string "merchant_normalized"
     t.date "next_expected"
+    t.string "status", default: "detected", null: false
     t.datetime "updated_at", null: false
     t.bigint "upload_id", null: false
+    t.text "user_note"
     t.index ["upload_id"], name: "index_subscriptions_on_upload_id"
   end
 
@@ -83,6 +95,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "merchant_aliases", "users"
   add_foreign_key "subscriptions", "uploads"
   add_foreign_key "uploads", "users"
 end

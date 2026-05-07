@@ -2,7 +2,7 @@
   <div class="section-header">
     <div>
       <h1 class="page-title">New Upload</h1>
-      <p class="page-subtitle">Upload a CSV or PDF statement to detect recurring subscriptions.</p>
+      <p class="page-subtitle">Upload a CSV, Excel, or PDF statement to detect recurring subscriptions.</p>
     </div>
   </div>
 
@@ -10,20 +10,53 @@
     <div class="section-header">
       <div>
         <h2 class="section-title">Upload File</h2>
-        <p class="section-note">CSV gives the best accuracy. PDF works well for text-based statements.</p>
+        <p class="section-note">CSV and Excel give the best accuracy. PDF works well for text-based statements.</p>
       </div>
     </div>
 
     <%= form_with model: @upload, local: true do |form| %>
       <div style="margin-bottom: 18px;">
-        <%= form.label :file, "Choose CSV or PDF", class: "small-text" %><br><br>
-        <%= form.file_field :file %>
+        <%= form.label :file, "Choose CSV, Excel, or PDF", class: "small-text" %><br><br>
+        <%= form.file_field :file, accept: ".csv,.xlsx,.xls,.pdf,text/csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %>
       </div>
 
       <div class="button-row">
         <%= form.submit "Upload File", class: "btn" %>
+        <%= link_to "Enter Rows Manually", new_manual_upload_path, class: "btn btn-secondary" %>
         <%= link_to "Back to Dashboard", uploads_path, class: "btn btn-secondary" %>
       </div>
     <% end %>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">What can I upload?</h2>
+        <p class="section-note">
+          Upload a bank statement, credit card statement, or transaction export. Files are analyzed for recurring charges so you can review subscriptions and upcoming bills.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>CSV Export</h3>
+        <p>Best option. Works with bank exports that include date, description, amount, debit, or credit columns.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>Excel Spreadsheet</h3>
+        <p>Useful for budgeting exports, bank spreadsheets, or manually maintained transaction sheets.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>PDF Statement</h3>
+        <p>Works with text-based PDF statements. Scanned image PDFs may need OCR support later.</p>
+      </div>
+    </div>
+
+    <div class="note-box" style="margin-top: 18px;">
+      Your uploaded files are used only to extract transactions and detect recurring charges. You can delete uploads at any time from the dashboard.
+    </div>
   </div>
 </div>

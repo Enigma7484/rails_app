@@ -2,6 +2,7 @@
   <% total_monthly = @total_monthly || 0 %>
   <% total_count = @total_count || 0 %>
   <% top_category = @top_category %>
+  <% upcoming_subscriptions = @upcoming_subscriptions || [] %>
 
   <div class="section-header">
     <div>
@@ -10,6 +11,7 @@
     </div>
     <div class="button-row">
       <%= link_to "New Upload", new_upload_path, class: "btn" %>
+      <%= link_to "Manual Entry", new_manual_upload_path, class: "btn btn-secondary" %>
     </div>
   </div>
 
@@ -31,6 +33,51 @@
       <div class="kpi-value"><%= top_category || "—" %></div>
       <div class="kpi-subtext">Highest spending category in the current view.</div>
     </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Upcoming Charges</h2>
+        <p class="section-note">Expected recurring charges over the next 30 days.</p>
+      </div>
+      <div class="pill-row">
+        <span class="soft-pill">7 days: $<%= "%.2f" % (@upcoming_7_day_total || 0) %></span>
+        <span class="soft-pill">30 days: $<%= "%.2f" % (@upcoming_30_day_total || 0) %></span>
+      </div>
+    </div>
+
+    <% if upcoming_subscriptions.any? %>
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Expected Date</th>
+              <th>Amount</th>
+              <th>Frequency</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% upcoming_subscriptions.each do |sub| %>
+              <tr>
+                <td class="merchant-cell">
+                  <strong><%= sub.merchant %></strong>
+                  <div class="merchant-meta"><%= sub.merchant_normalized %></div>
+                </td>
+                <td><%= sub.next_expected %></td>
+                <td>$<%= "%.2f" % sub.avg_amount.to_f %></td>
+                <td><span class="badge badge-blue"><%= sub.frequency %></span></td>
+                <td><span class="soft-pill"><%= sub.status %></span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="note-box">No upcoming charges detected.</div>
+    <% end %>
   </div>
 
   <div class="section-card">
@@ -137,7 +184,7 @@
     <% else %>
       <div class="empty-state-card">
         <h3>No uploads yet</h3>
-        <p class="empty-state-text">Upload a CSV or PDF statement to start analyzing subscriptions.</p>
+        <p class="empty-state-text">Upload a CSV, Excel, or PDF statement to start analyzing subscriptions.</p>
         <div class="button-row">
           <%= link_to "Create First Upload", new_upload_path, class: "btn" %>
         </div>

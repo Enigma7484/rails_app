@@ -1,0 +1,35 @@
+<div class="page-container">
+  <div class="section-header">
+    <div>
+      <h1 class="page-title">Manual Transactions</h1>
+      <p class="page-subtitle">Paste transaction rows when you do not have a clean statement export ready.</p>
+    </div>
+    <div class="button-row">
+      <%= link_to "Upload File", new_upload_path, class: "btn btn-secondary" %>
+      <%= link_to "Back to Dashboard", uploads_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Paste Rows</h2>
+        <p class="section-note">Use one transaction per line: date, merchant, amount, and optional three-letter currency.</p>
+      </div>
+    </div>
+
+    <%= form_with url: analyze_manual_upload_path, method: :post, local: true do |form| %>
+      <div style="margin-bottom: 18px;">
+        <%= form.label :transactions, "Transactions", class: "small-text" %><br><br>
+        <%= form.text_area :transactions,
+              rows: 10,
+              value: "2026-01-03 Netflix 15.99 CAD\n2026-02-03 Netflix 15.99 CAD\n2026-03-03 Netflix 15.99 CAD",
+              class: "manual-input" %>
+      </div>
+
+      <div class="button-row">
+        <%= form.submit "Analyze Rows", class: "btn" %>
+      </div>
+    <% end %>
+  </div>
+</div>

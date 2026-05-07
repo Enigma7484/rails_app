@@ -27,10 +27,22 @@ class UploadsController < ApplicationController
     @total_monthly = @subscriptions.where(frequency: "monthly").sum(:avg_amount)
     @total_count = @subscriptions.count
     @top_category = @category_spend.max_by { |_k, v| v }&.first
+    @upcoming_subscriptions = @subscriptions
+      .where.not(next_expected: nil)
+      .where(next_expected: Date.current..30.days.from_now.to_date)
+      .where.not(status: "ignored")
+      .order(:next_expected)
+    @upcoming_7_day_total = @upcoming_subscriptions
+      .where(next_expected: Date.current..7.days.from_now.to_date)
+      .sum(:avg_amount)
+    @upcoming_30_day_total = @upcoming_subscriptions.sum(:avg_amount)
   end
 
   def new
     @upload = Upload.new
+  end
+
+  def new_manual
   end
 
   def create
@@ -44,8 +56,42 @@ class UploadsController < ApplicationController
     end
   end
 
+  def analyze_manual
+    rows = parse_manual_rows(params[:transactions].to_s)
+
+    if rows.empty?
+      redirect_to new_manual_upload_path, alert: "Add at least one transaction in the format YYYY-MM-DD Merchant Amount Currency."
+      return
+    end
+
+    connection = Faraday.new(url: ENV.fetch("AGENT_SERVICE_URL")) do |f|
+      f.request :json
+      f.response :raise_error
+      f.adapter Faraday.default_adapter
+    end
+
+    response = connection.post("/analyze-rows") do |req|
+      req.headers["Content-Type"] = "application/json"
+      req.body = { rows: rows }
+    end
+
+    parsed = JSON.parse(response.body)
+    upload = current_user.uploads.create!(analysis_result: parsed)
+    if parsed["error"].present?
+      redirect_to upload, alert: "Manual analysis completed with an error: #{parsed["error"]}"
+      return
+    end
+
+    persist_subscriptions!(upload)
+
+    redirect_to upload, notice: "Manual transactions analyzed successfully."
+  rescue => e
+    redirect_to new_manual_upload_path, alert: "Error while analyzing manual transactions: #{e.message}"
+  end
+
   def show
     @upload = current_user.uploads.find(params[:id])
+    @persisted_subscriptions = @upload.subscriptions
   end
 
   def destroy
@@ -84,6 +130,11 @@ class UploadsController < ApplicationController
     if response.success?
       parsed = JSON.parse(response.body)
       @upload.update!(analysis_result: parsed)
+      if parsed["error"].present?
+        redirect_to @upload, alert: "Analysis completed with an error: #{parsed["error"]}"
+        return
+      end
+
       persist_subscriptions!(@upload)
       redirect_to @upload, notice: "Analysis completed."
     else
@@ -112,7 +163,10 @@ class UploadsController < ApplicationController
       return
     end
 
-    parsed_rows[row_index]["merchant_normalized"] = params[:merchant_normalized].to_s.strip
+    canonical_name = params[:merchant_normalized].to_s.strip
+    raw_name = parsed_rows[row_index]["merchant"].to_s.strip
+    parsed_rows[row_index]["merchant_normalized"] = canonical_name
+    remember_merchant_alias(raw_name, canonical_name)
 
     updated_result = @upload.analysis_result || {}
     updated_result["parsed_rows"] = parsed_rows
@@ -129,7 +183,7 @@ class UploadsController < ApplicationController
       return
     end
 
-    parsed_rows = @upload.analysis_result["parsed_rows"] || []
+    parsed_rows = apply_user_aliases(@upload.analysis_result["parsed_rows"] || [])
 
     connection = Faraday.new(url: ENV.fetch("AGENT_SERVICE_URL")) do |f|
       f.request :json
@@ -292,10 +346,19 @@ class UploadsController < ApplicationController
   private
 
   def persist_subscriptions!(upload)
+    previous_statuses = upload.subscriptions.each_with_object({}) do |subscription, statuses|
+      statuses[subscription_key(subscription)] = {
+        status: subscription.status,
+        user_note: subscription.user_note
+      }
+    end
+
     upload.subscriptions.destroy_all
     subscriptions = (upload.analysis_result || {})["subscriptions"] || []
 
     subscriptions.each do |sub|
+      previous = previous_statuses[subscription_key(sub)] || {}
+
       upload.subscriptions.create!(
         merchant: sub["merchant"],
         merchant_normalized: sub["merchant_normalized"],
@@ -308,8 +371,59 @@ class UploadsController < ApplicationController
         next_expected: sub["next_expected"],
         confidence: sub["confidence"],
         evidence: sub["evidence"].is_a?(Hash) ? sub["evidence"].to_json : sub["evidence"],
-        evidence_summary: sub["evidence_summary"]
+        evidence_summary: sub["evidence_summary"],
+        status: previous[:status] || "detected",
+        user_note: previous[:user_note]
       )
     end
+  end
+
+  def apply_user_aliases(rows)
+    aliases = current_user.merchant_aliases.to_a
+
+    rows.map do |row|
+      matched = aliases.find do |alias_record|
+        raw_name = alias_record.raw_name.to_s.downcase
+        row["merchant"].to_s.downcase.include?(raw_name) ||
+          row["merchant_normalized"].to_s.downcase == raw_name
+      end
+
+      row["merchant_normalized"] = matched.canonical_name if matched
+      row
+    end
+  end
+
+  def parse_manual_rows(text)
+    text.lines.filter_map do |line|
+      match = line.strip.match(
+        /\A(?<date>\d{4}-\d{2}-\d{2})\s+(?<merchant>.+?)\s+(?<amount>-?\$?\d+(?:,\d{3})*(?:\.\d{1,2})?)\s*(?<currency>[A-Za-z]{3})?\z/
+      )
+      next unless match
+
+      {
+        date: match[:date],
+        merchant: match[:merchant].strip,
+        amount: match[:amount].delete("$,").to_f,
+        currency: match[:currency].presence || "CAD"
+      }
+    end
+  end
+
+  def remember_merchant_alias(raw_name, canonical_name)
+    return if raw_name.blank? || canonical_name.blank?
+
+    alias_record = current_user.merchant_aliases.find_or_initialize_by(raw_name: raw_name)
+    alias_record.canonical_name = canonical_name
+    alias_record.save!
+  end
+
+  def subscription_key(subscription)
+    merchant = subscription.respond_to?(:merchant_normalized) ? subscription.merchant_normalized : subscription["merchant_normalized"]
+    amount = subscription.respond_to?(:avg_amount) ? subscription.avg_amount : subscription["avg_amount"]
+
+    [
+      merchant.to_s.downcase.strip,
+      format("%.2f", amount.to_f)
+    ].join("|")
   end
 end
