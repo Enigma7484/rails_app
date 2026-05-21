@@ -334,6 +334,8 @@ class UploadsController < ApplicationController
     updated_result["subscriptions"] = parsed["subscriptions"] || subscriptions
     updated_result["warnings"] = parsed["warnings"] || []
     updated_result["enrichment_error"] = parsed["error"] if parsed.key?("error")
+    updated_result["enrichment_provider"] = parsed["enrichment_provider"] if parsed.key?("enrichment_provider")
+    updated_result["enrichment_model"] = parsed["enrichment_model"] if parsed.key?("enrichment_model")
 
     @upload.update!(analysis_result: updated_result)
     persist_subscriptions!(@upload)

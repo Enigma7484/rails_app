@@ -8,6 +8,8 @@
   <% row_count = analysis_result["row_count"] || 0 %>
   <% file_type = analysis_result["file_type"] || "unknown" %>
   <% analysis_error = analysis_result["error"].to_s %>
+  <% enrichment_provider = analysis_result["enrichment_provider"].to_s %>
+  <% enrichment_model = analysis_result["enrichment_model"].to_s %>
   <% monthly_total = subscriptions.select { |s| s["frequency"] == "monthly" }.sum { |s| s["avg_amount"].to_f } %>
   <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
   <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
@@ -106,9 +108,24 @@
 
     <% if warnings.any? %>
       <div class="pill-row">
+        <% if enrichment_provider.present? %>
+          <span class="soft-pill">
+            Enrichment:
+            <%= enrichment_provider == "rules_fallback" ? "Rule fallback" : enrichment_provider.titleize %>
+            <%= "(#{enrichment_model})" if enrichment_model.present? %>
+          </span>
+        <% end %>
         <% warnings.each do |warning| %>
           <span class="soft-pill"><%= warning %></span>
         <% end %>
+      </div>
+    <% elsif enrichment_provider.present? %>
+      <div class="pill-row">
+        <span class="soft-pill">
+          Enrichment:
+          <%= enrichment_provider == "rules_fallback" ? "Rule fallback" : enrichment_provider.titleize %>
+          <%= "(#{enrichment_model})" if enrichment_model.present? %>
+        </span>
       </div>
     <% else %>
       <div class="note-box">No parsing warnings for this upload.</div>
