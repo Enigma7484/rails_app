@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${RENDER_DATABASE_URL:-}" ]]; then
+  echo "Missing RENDER_DATABASE_URL. Set it to the current Render Postgres external connection string." >&2
+  exit 1
+fi
+
+if [[ -z "${NEON_DATABASE_URL:-}" ]]; then
+  echo "Missing NEON_DATABASE_URL. Set it to the target Neon connection string." >&2
+  exit 1
+fi
+
+for command_name in pg_dump pg_restore psql; do
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    echo "Missing required command: $command_name" >&2
+    echo "Install PostgreSQL client tools, then rerun this script." >&2
+    exit 1
+  fi
+done
+
+if [[ "$NEON_DATABASE_URL" != *"sslmode=require"* ]]; then
+  echo "Warning: NEON_DATABASE_URL does not include sslmode=require." >&2
+fi
+
+backup_file="${BACKUP_FILE:-tmp/render-postgres-backup-$(date +%Y%m%d%H%M%S).dump}"
+mkdir -p "$(dirname "$backup_file")"
+
+echo "Creating Render Postgres backup at $backup_file"
+pg_dump \
+  --format=custom \
+  --no-owner \
+  --no-acl \
+  --file="$backup_file" \
+  "$RENDER_DATABASE_URL"
+
+echo "Restoring backup into Neon"
+pg_restore \
+  --clean \
+  --if-exists \
+  --no-owner \
+  --no-acl \
+  --dbname="$NEON_DATABASE_URL" \
+  "$backup_file"
+
+echo "Running Rails migrations against Neon"
+DATABASE_URL="$NEON_DATABASE_URL" bin/rails db:migrate
+
+echo "Done. Keep $backup_file until production is verified."
