@@ -1,0 +1,63 @@
+<div class="page-container">
+  <div class="page-topbar">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Tune the workspace theme and glass effects.</p>
+    </div>
+    <div class="button-row">
+      <%= link_to "Dashboard", uploads_path, class: "btn btn-secondary" if user_signed_in? %>
+      <%= link_to "Home", root_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+    <section class="section-card theme-settings" data-theme-settings>
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Theme</h2>
+          <p class="section-note">Choose the visual profile used across BillsAgent.</p>
+        </div>
+      </div>
+
+      <div class="settings-control">
+        <label class="settings-label" for="theme-select">Theme profile</label>
+        <select id="theme-select" data-theme-select>
+          <option value="terminal">Terminal Glass</option>
+          <option value="default">Classic Dark</option>
+        </select>
+      </div>
+
+      <div class="settings-control">
+        <label class="settings-label" for="panel-alpha">Panel opacity</label>
+        <input id="panel-alpha" type="range" min="0.42" max="0.94" step="0.02" data-panel-alpha>
+      </div>
+
+      <div class="settings-control">
+        <label class="settings-label" for="panel-blur">Background blur</label>
+        <input id="panel-blur" type="range" min="4" max="30" step="1" data-panel-blur>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="btn" data-theme-save>Save Theme</button>
+        <button type="button" class="btn btn-secondary" data-theme-reset>Reset</button>
+      </div>
+    </section>
+
+    <section class="section-card terminal-preview">
+      <div class="terminal-window">
+        <div class="terminal-bar">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="terminal-lines">
+          <div><span class="terminal-prompt">bills@agent</span>:~$ scan recurring-charges.xlsx</div>
+          <div>parser: excel schema mapped</div>
+          <div>detector: 7 recurring charges found</div>
+          <div>forecast: next charge window ready</div>
+          <div><span class="terminal-cursor">_</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

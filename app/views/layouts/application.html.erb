@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("billsAgent.theme") || "terminal";
+          var alpha = localStorage.getItem("billsAgent.panelAlpha") || "0.66";
+          var blur = localStorage.getItem("billsAgent.blur") || "18";
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.setProperty("--theme-panel-alpha", alpha);
+          document.documentElement.style.setProperty("--theme-blur", blur + "px");
+        } catch (_) {}
+      })();
+    </script>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -18,12 +30,14 @@
         <div class="navbar-links">
           <% if user_signed_in? %>
             <%= link_to "Dashboard", uploads_path, class: "navbar-link" %>
+            <%= link_to "Settings", settings_path, class: "navbar-link" %>
             <%= link_to "New Upload", new_upload_path, class: "navbar-link navbar-link-pill" %>
 
             <%= form_with url: destroy_user_session_path, method: :delete, local: true, html: { class: "navbar-signout-form" } do %>
               <button type="submit" class="navbar-link-button">Sign Out</button>
             <% end %>
           <% else %>
+            <%= link_to "Settings", settings_path, class: "navbar-link" %>
             <%= link_to "Sign In", new_user_session_path, class: "navbar-link" %>
             <%= link_to "Register", new_user_registration_path, class: "navbar-link navbar-link-pill" %>
           <% end %>

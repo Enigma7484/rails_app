@@ -703,3 +703,224 @@ select {
   border-color: #60a5fa;
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 460px) minmax(320px, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.settings-control {
+  margin-bottom: 18px;
+}
+
+.settings-label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.theme-settings input[type="range"] {
+  width: 100%;
+  accent-color: var(--green);
+}
+
+.terminal-preview {
+  display: flex;
+  min-height: 360px;
+}
+
+.terminal-window {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  background: rgba(0, 10, 5, 0.62);
+  box-shadow: inset 0 0 42px rgba(34, 197, 94, 0.08), 0 24px 64px rgba(0, 0, 0, 0.32);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.terminal-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  background: rgba(5, 20, 12, 0.9);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.terminal-bar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.65);
+}
+
+.terminal-bar span:nth-child(2) {
+  background: #facc15;
+}
+
+.terminal-bar span:nth-child(3) {
+  background: #38bdf8;
+}
+
+.terminal-lines {
+  padding: 22px;
+  color: #bbf7d0;
+  font-size: 15px;
+  line-height: 1.9;
+  text-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+}
+
+.terminal-prompt,
+.terminal-cursor {
+  color: #22c55e;
+  font-weight: 800;
+}
+
+@media (max-width: 860px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme="terminal"] {
+  --bg: #020604;
+  --panel: rgba(3, 18, 10, var(--theme-panel-alpha, 0.66));
+  --panel-2: rgba(7, 32, 18, var(--theme-panel-alpha, 0.66));
+  --border: rgba(34, 197, 94, 0.22);
+  --text: #e8ffe8;
+  --muted: #91b59c;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #fb7185;
+  --blue: #16a34a;
+  --blue-hover: #15803d;
+  --input: rgba(0, 8, 4, 0.72);
+  color-scheme: dark;
+}
+
+html[data-theme="terminal"] body {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(34, 197, 94, 0.14), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgba(20, 184, 166, 0.1), transparent 34%),
+    linear-gradient(180deg, #020604 0%, #04120a 48%, #010302 100%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", Inter, sans-serif;
+}
+
+html[data-theme="terminal"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 50%, rgba(0, 0, 0, 0.08) 50%),
+    linear-gradient(90deg, rgba(34, 197, 94, 0.05), rgba(0, 0, 0, 0), rgba(56, 189, 248, 0.025));
+  background-size: 100% 4px, 6px 100%;
+  opacity: 0.55;
+}
+
+html[data-theme="terminal"] .navbar,
+html[data-theme="terminal"] .section-card,
+html[data-theme="terminal"] .summary-card,
+html[data-theme="terminal"] .kpi-card,
+html[data-theme="terminal"] .feature-card,
+html[data-theme="terminal"] .empty-state-card,
+html[data-theme="terminal"] .auth-card,
+html[data-theme="terminal"] .hero-card {
+  background: linear-gradient(180deg, rgba(2, 18, 9, var(--theme-panel-alpha, 0.66)), rgba(0, 7, 4, var(--theme-panel-alpha, 0.66)));
+  border-color: rgba(34, 197, 94, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(187, 247, 208, 0.06),
+    0 22px 70px rgba(0, 0, 0, 0.34),
+    0 0 40px rgba(34, 197, 94, 0.035);
+  backdrop-filter: blur(var(--theme-blur, 18px)) saturate(1.12);
+  -webkit-backdrop-filter: blur(var(--theme-blur, 18px)) saturate(1.12);
+}
+
+html[data-theme="terminal"] .navbar {
+  background: rgba(1, 9, 5, var(--theme-panel-alpha, 0.66));
+}
+
+html[data-theme="terminal"] .page-title,
+html[data-theme="terminal"] .hero-title,
+html[data-theme="terminal"] .navbar-brand,
+html[data-theme="terminal"] .kpi-value {
+  color: #f0fff4;
+  text-shadow: 0 0 18px rgba(34, 197, 94, 0.24);
+}
+
+html[data-theme="terminal"] .section-title,
+html[data-theme="terminal"] .feature-card h3,
+html[data-theme="terminal"] .empty-state-card h3 {
+  color: #dcfce7;
+}
+
+html[data-theme="terminal"] .btn,
+html[data-theme="terminal"] button,
+html[data-theme="terminal"] input[type="submit"] {
+  background: rgba(22, 163, 74, 0.82);
+  border: 1px solid rgba(134, 239, 172, 0.28);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.14);
+}
+
+html[data-theme="terminal"] .btn:hover,
+html[data-theme="terminal"] button:hover,
+html[data-theme="terminal"] input[type="submit"]:hover {
+  background: rgba(21, 128, 61, 0.92);
+}
+
+html[data-theme="terminal"] .btn-secondary,
+html[data-theme="terminal"] .navbar-link-pill {
+  background: rgba(6, 78, 59, 0.64);
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.24);
+}
+
+html[data-theme="terminal"] .table-wrap,
+html[data-theme="terminal"] .note-box,
+html[data-theme="terminal"] .meta-pill,
+html[data-theme="terminal"] .soft-pill,
+html[data-theme="terminal"] input[type="file"],
+html[data-theme="terminal"] select,
+html[data-theme="terminal"] .inline-form input[type="text"],
+html[data-theme="terminal"] .manual-input,
+html[data-theme="terminal"] .auth-card input[type="email"],
+html[data-theme="terminal"] .auth-card input[type="password"],
+html[data-theme="terminal"] .auth-card input[type="text"] {
+  background: rgba(0, 10, 5, var(--theme-panel-alpha, 0.66));
+  border-color: rgba(34, 197, 94, 0.2);
+  color: #e8ffe8;
+  backdrop-filter: blur(var(--theme-blur, 18px));
+  -webkit-backdrop-filter: blur(var(--theme-blur, 18px));
+}
+
+html[data-theme="terminal"] .modern-table thead th {
+  background: rgba(34, 197, 94, 0.07);
+  color: #bbf7d0;
+}
+
+html[data-theme="terminal"] .modern-table tbody tr:hover {
+  background: rgba(34, 197, 94, 0.045);
+}
+
+html[data-theme="terminal"] .badge-blue,
+html[data-theme="terminal"] .hero-badge {
+  background: rgba(34, 197, 94, 0.12);
+  color: #bbf7d0;
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+html[data-theme="terminal"] .btn-link,
+html[data-theme="terminal"] .auth-card a,
+html[data-theme="terminal"] .metric-highlight {
+  color: #86efac;
+}

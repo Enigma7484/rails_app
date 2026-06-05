@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   root "pages#home"
+  get "settings", to: "pages#settings", as: :settings
 
   devise_for :users
 
