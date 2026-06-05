@@ -924,3 +924,532 @@ html[data-theme="terminal"] .auth-card a,
 html[data-theme="terminal"] .metric-highlight {
   color: #86efac;
 }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --bg: #f6f8fb;
+  --panel: rgba(255, 255, 255, var(--theme-panel-alpha, 0.82));
+  --panel-2: rgba(241, 245, 249, var(--theme-panel-alpha, 0.82));
+  --border: #d8e0ea;
+  --text: #0f172a;
+  --muted: #64748b;
+  --green: #16a34a;
+  --yellow: #b45309;
+  --red: #dc2626;
+  --blue: #2563eb;
+  --blue-hover: #1d4ed8;
+  --input: rgba(255, 255, 255, 0.84);
+  color-scheme: light;
+}
+
+html[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37, 99, 235, 0.1), transparent 32%),
+    radial-gradient(circle at 86% 12%, rgba(20, 184, 166, 0.09), transparent 30%),
+    linear-gradient(180deg, #f8fafc 0%, #eef4fb 55%, #f7fafc 100%);
+  color: var(--text);
+}
+
+html[data-theme="light"] .navbar,
+html[data-theme="light"] .section-card,
+html[data-theme="light"] .summary-card,
+html[data-theme="light"] .kpi-card,
+html[data-theme="light"] .feature-card,
+html[data-theme="light"] .empty-state-card,
+html[data-theme="light"] .auth-card,
+html[data-theme="light"] .hero-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, var(--theme-panel-alpha, 0.82)), rgba(248, 250, 252, var(--theme-panel-alpha, 0.82)));
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 18px 44px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(var(--theme-blur, 18px)) saturate(1.08);
+  -webkit-backdrop-filter: blur(var(--theme-blur, 18px)) saturate(1.08);
+}
+
+html[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, var(--theme-panel-alpha, 0.82));
+  border-bottom-color: rgba(15, 23, 42, 0.09);
+}
+
+html[data-theme="light"] .navbar-brand,
+html[data-theme="light"] .page-title,
+html[data-theme="light"] .hero-title,
+html[data-theme="light"] .section-title,
+html[data-theme="light"] .feature-card h3,
+html[data-theme="light"] .empty-state-card h3,
+html[data-theme="light"] .kpi-value,
+html[data-theme="light"] .data-value,
+html[data-theme="light"] .meta-pill strong {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .navbar-link,
+html[data-theme="light"] .navbar-link-button {
+  color: #475569;
+}
+
+html[data-theme="light"] .navbar-link:hover,
+html[data-theme="light"] .navbar-link-button:hover {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .btn,
+html[data-theme="light"] button,
+html[data-theme="light"] input[type="submit"] {
+  color: #ffffff;
+  background: var(--blue);
+}
+
+html[data-theme="light"] .btn:hover,
+html[data-theme="light"] button:hover,
+html[data-theme="light"] input[type="submit"]:hover {
+  background: var(--blue-hover);
+}
+
+html[data-theme="light"] .btn-secondary,
+html[data-theme="light"] .navbar-link-pill {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+}
+
+html[data-theme="light"] .btn-secondary:hover,
+html[data-theme="light"] .navbar-link-pill:hover {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1e40af;
+}
+
+html[data-theme="light"] .table-wrap,
+html[data-theme="light"] .note-box,
+html[data-theme="light"] .meta-pill,
+html[data-theme="light"] .soft-pill,
+html[data-theme="light"] input[type="file"],
+html[data-theme="light"] select,
+html[data-theme="light"] .inline-form input[type="text"],
+html[data-theme="light"] .manual-input,
+html[data-theme="light"] .auth-card input[type="email"],
+html[data-theme="light"] .auth-card input[type="password"],
+html[data-theme="light"] .auth-card input[type="text"] {
+  background: rgba(255, 255, 255, var(--theme-panel-alpha, 0.82));
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+html[data-theme="light"] .modern-table thead th {
+  background: rgba(15, 23, 42, 0.035);
+  color: #475569;
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+html[data-theme="light"] .modern-table tbody td {
+  border-bottom-color: rgba(15, 23, 42, 0.07);
+}
+
+html[data-theme="light"] .modern-table tbody tr:hover {
+  background: rgba(37, 99, 235, 0.045);
+}
+
+html[data-theme="light"] .badge-green {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d;
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+html[data-theme="light"] .badge-yellow {
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+html[data-theme="light"] .badge-red {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+html[data-theme="light"] .badge-blue,
+html[data-theme="light"] .hero-badge {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+html[data-theme="light"] .btn-link,
+html[data-theme="light"] .auth-card a,
+html[data-theme="light"] .metric-highlight {
+  color: #2563eb;
+}
+
+html[data-theme="light"] .auth-card label,
+html[data-theme="light"] .soft-pill,
+html[data-theme="light"] .note-box,
+html[data-theme="light"] input[type="file"] {
+  color: #475569;
+}
+
+html[data-theme="light"] .alert-success {
+  background: rgba(22, 163, 74, 0.1);
+  color: #166534;
+  border-color: rgba(22, 163, 74, 0.24);
+}
+
+html[data-theme="light"] .alert-error {
+  background: rgba(220, 38, 38, 0.1);
+  color: #991b1b;
+  border-color: rgba(220, 38, 38, 0.24);
+}
+
+html[data-theme="solar"] {
+  --bg: #f8f3df;
+  --panel: rgba(255, 251, 235, var(--theme-panel-alpha, 0.82));
+  --panel-2: rgba(254, 243, 199, var(--theme-panel-alpha, 0.82));
+  --border: #e7d9af;
+  --text: #292112;
+  --muted: #7c6f55;
+  --green: #0f766e;
+  --yellow: #b45309;
+  --red: #be123c;
+  --blue: #0f766e;
+  --blue-hover: #115e59;
+  --input: rgba(255, 251, 235, 0.86);
+  color-scheme: light;
+}
+
+html[data-theme="ocean"] {
+  --bg: #06131f;
+  --panel: rgba(8, 24, 38, var(--theme-panel-alpha, 0.7));
+  --panel-2: rgba(14, 47, 70, var(--theme-panel-alpha, 0.7));
+  --border: rgba(125, 211, 252, 0.24);
+  --text: #e0f7ff;
+  --muted: #9bc5d6;
+  --green: #2dd4bf;
+  --yellow: #fde68a;
+  --red: #fb7185;
+  --blue: #0284c7;
+  --blue-hover: #0369a1;
+  --input: rgba(5, 18, 30, 0.74);
+  color-scheme: dark;
+}
+
+html[data-theme="ember"] {
+  --bg: #150906;
+  --panel: rgba(38, 15, 10, var(--theme-panel-alpha, 0.72));
+  --panel-2: rgba(69, 26, 12, var(--theme-panel-alpha, 0.72));
+  --border: rgba(251, 146, 60, 0.24);
+  --text: #fff4e8;
+  --muted: #d6aa8b;
+  --green: #84cc16;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --blue: #ea580c;
+  --blue-hover: #c2410c;
+  --input: rgba(30, 10, 6, 0.74);
+  color-scheme: dark;
+}
+
+html[data-theme="graphite"] {
+  --bg: #0b0d10;
+  --panel: rgba(22, 25, 29, var(--theme-panel-alpha, 0.72));
+  --panel-2: rgba(35, 39, 46, var(--theme-panel-alpha, 0.72));
+  --border: rgba(203, 213, 225, 0.16);
+  --text: #f8fafc;
+  --muted: #a8b3c2;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --blue: #64748b;
+  --blue-hover: #475569;
+  --input: rgba(8, 10, 13, 0.76);
+  color-scheme: dark;
+}
+
+html[data-theme="solar"] body {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(245, 158, 11, 0.16), transparent 32%),
+    radial-gradient(circle at 88% 16%, rgba(20, 184, 166, 0.12), transparent 30%),
+    linear-gradient(180deg, #fbf4d8 0%, #f3ead1 52%, #fffaf0 100%);
+  color: var(--text);
+}
+
+html[data-theme="ocean"] body {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.18), transparent 34%),
+    radial-gradient(circle at 90% 16%, rgba(45, 212, 191, 0.14), transparent 30%),
+    linear-gradient(180deg, #06131f 0%, #082032 54%, #030911 100%);
+  color: var(--text);
+}
+
+html[data-theme="ember"] body {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(249, 115, 22, 0.18), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgba(244, 63, 94, 0.12), transparent 30%),
+    linear-gradient(180deg, #150906 0%, #26100b 52%, #090302 100%);
+  color: var(--text);
+}
+
+html[data-theme="graphite"] body {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(100, 116, 139, 0.16), transparent 32%),
+    radial-gradient(circle at 88% 18%, rgba(37, 99, 235, 0.08), transparent 30%),
+    linear-gradient(180deg, #0b0d10 0%, #151922 52%, #050608 100%);
+  color: var(--text);
+}
+
+html[data-theme="solar"] .navbar,
+html[data-theme="solar"] .section-card,
+html[data-theme="solar"] .summary-card,
+html[data-theme="solar"] .kpi-card,
+html[data-theme="solar"] .feature-card,
+html[data-theme="solar"] .empty-state-card,
+html[data-theme="solar"] .auth-card,
+html[data-theme="solar"] .hero-card,
+html[data-theme="ocean"] .navbar,
+html[data-theme="ocean"] .section-card,
+html[data-theme="ocean"] .summary-card,
+html[data-theme="ocean"] .kpi-card,
+html[data-theme="ocean"] .feature-card,
+html[data-theme="ocean"] .empty-state-card,
+html[data-theme="ocean"] .auth-card,
+html[data-theme="ocean"] .hero-card,
+html[data-theme="ember"] .navbar,
+html[data-theme="ember"] .section-card,
+html[data-theme="ember"] .summary-card,
+html[data-theme="ember"] .kpi-card,
+html[data-theme="ember"] .feature-card,
+html[data-theme="ember"] .empty-state-card,
+html[data-theme="ember"] .auth-card,
+html[data-theme="ember"] .hero-card,
+html[data-theme="graphite"] .navbar,
+html[data-theme="graphite"] .section-card,
+html[data-theme="graphite"] .summary-card,
+html[data-theme="graphite"] .kpi-card,
+html[data-theme="graphite"] .feature-card,
+html[data-theme="graphite"] .empty-state-card,
+html[data-theme="graphite"] .auth-card,
+html[data-theme="graphite"] .hero-card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border-color: var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 20px 58px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(var(--theme-blur, 18px)) saturate(1.08);
+  -webkit-backdrop-filter: blur(var(--theme-blur, 18px)) saturate(1.08);
+}
+
+html[data-theme="solar"] .navbar,
+html[data-theme="ocean"] .navbar,
+html[data-theme="ember"] .navbar,
+html[data-theme="graphite"] .navbar {
+  background: var(--panel);
+  border-bottom-color: var(--border);
+}
+
+html[data-theme="solar"] .navbar-brand,
+html[data-theme="solar"] .page-title,
+html[data-theme="solar"] .hero-title,
+html[data-theme="solar"] .section-title,
+html[data-theme="solar"] .feature-card h3,
+html[data-theme="solar"] .empty-state-card h3,
+html[data-theme="solar"] .kpi-value,
+html[data-theme="solar"] .data-value,
+html[data-theme="solar"] .meta-pill strong,
+html[data-theme="ocean"] .navbar-brand,
+html[data-theme="ocean"] .page-title,
+html[data-theme="ocean"] .hero-title,
+html[data-theme="ocean"] .section-title,
+html[data-theme="ocean"] .feature-card h3,
+html[data-theme="ocean"] .empty-state-card h3,
+html[data-theme="ocean"] .kpi-value,
+html[data-theme="ocean"] .data-value,
+html[data-theme="ocean"] .meta-pill strong,
+html[data-theme="ember"] .navbar-brand,
+html[data-theme="ember"] .page-title,
+html[data-theme="ember"] .hero-title,
+html[data-theme="ember"] .section-title,
+html[data-theme="ember"] .feature-card h3,
+html[data-theme="ember"] .empty-state-card h3,
+html[data-theme="ember"] .kpi-value,
+html[data-theme="ember"] .data-value,
+html[data-theme="ember"] .meta-pill strong,
+html[data-theme="graphite"] .navbar-brand,
+html[data-theme="graphite"] .page-title,
+html[data-theme="graphite"] .hero-title,
+html[data-theme="graphite"] .section-title,
+html[data-theme="graphite"] .feature-card h3,
+html[data-theme="graphite"] .empty-state-card h3,
+html[data-theme="graphite"] .kpi-value,
+html[data-theme="graphite"] .data-value,
+html[data-theme="graphite"] .meta-pill strong {
+  color: var(--text);
+}
+
+html[data-theme="solar"] .navbar-link,
+html[data-theme="solar"] .navbar-link-button,
+html[data-theme="ocean"] .navbar-link,
+html[data-theme="ocean"] .navbar-link-button,
+html[data-theme="ember"] .navbar-link,
+html[data-theme="ember"] .navbar-link-button,
+html[data-theme="graphite"] .navbar-link,
+html[data-theme="graphite"] .navbar-link-button {
+  color: var(--muted);
+}
+
+html[data-theme="solar"] .navbar-link:hover,
+html[data-theme="solar"] .navbar-link-button:hover,
+html[data-theme="ocean"] .navbar-link:hover,
+html[data-theme="ocean"] .navbar-link-button:hover,
+html[data-theme="ember"] .navbar-link:hover,
+html[data-theme="ember"] .navbar-link-button:hover,
+html[data-theme="graphite"] .navbar-link:hover,
+html[data-theme="graphite"] .navbar-link-button:hover {
+  color: var(--text);
+}
+
+html[data-theme="solar"] .btn,
+html[data-theme="solar"] button,
+html[data-theme="solar"] input[type="submit"],
+html[data-theme="ocean"] .btn,
+html[data-theme="ocean"] button,
+html[data-theme="ocean"] input[type="submit"],
+html[data-theme="ember"] .btn,
+html[data-theme="ember"] button,
+html[data-theme="ember"] input[type="submit"],
+html[data-theme="graphite"] .btn,
+html[data-theme="graphite"] button,
+html[data-theme="graphite"] input[type="submit"] {
+  background: var(--blue);
+  border: 1px solid color-mix(in srgb, var(--blue) 42%, transparent);
+  color: #ffffff;
+}
+
+html[data-theme="solar"] .btn:hover,
+html[data-theme="solar"] button:hover,
+html[data-theme="solar"] input[type="submit"]:hover,
+html[data-theme="ocean"] .btn:hover,
+html[data-theme="ocean"] button:hover,
+html[data-theme="ocean"] input[type="submit"]:hover,
+html[data-theme="ember"] .btn:hover,
+html[data-theme="ember"] button:hover,
+html[data-theme="ember"] input[type="submit"]:hover,
+html[data-theme="graphite"] .btn:hover,
+html[data-theme="graphite"] button:hover,
+html[data-theme="graphite"] input[type="submit"]:hover {
+  background: var(--blue-hover);
+}
+
+html[data-theme="solar"] .btn-secondary,
+html[data-theme="solar"] .navbar-link-pill,
+html[data-theme="ocean"] .btn-secondary,
+html[data-theme="ocean"] .navbar-link-pill,
+html[data-theme="ember"] .btn-secondary,
+html[data-theme="ember"] .navbar-link-pill,
+html[data-theme="graphite"] .btn-secondary,
+html[data-theme="graphite"] .navbar-link-pill {
+  background: color-mix(in srgb, var(--blue) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blue) 28%, transparent);
+  color: var(--text);
+}
+
+html[data-theme="solar"] .table-wrap,
+html[data-theme="solar"] .note-box,
+html[data-theme="solar"] .meta-pill,
+html[data-theme="solar"] .soft-pill,
+html[data-theme="solar"] input[type="file"],
+html[data-theme="solar"] select,
+html[data-theme="solar"] .inline-form input[type="text"],
+html[data-theme="solar"] .manual-input,
+html[data-theme="solar"] .auth-card input[type="email"],
+html[data-theme="solar"] .auth-card input[type="password"],
+html[data-theme="solar"] .auth-card input[type="text"],
+html[data-theme="ocean"] .table-wrap,
+html[data-theme="ocean"] .note-box,
+html[data-theme="ocean"] .meta-pill,
+html[data-theme="ocean"] .soft-pill,
+html[data-theme="ocean"] input[type="file"],
+html[data-theme="ocean"] select,
+html[data-theme="ocean"] .inline-form input[type="text"],
+html[data-theme="ocean"] .manual-input,
+html[data-theme="ocean"] .auth-card input[type="email"],
+html[data-theme="ocean"] .auth-card input[type="password"],
+html[data-theme="ocean"] .auth-card input[type="text"],
+html[data-theme="ember"] .table-wrap,
+html[data-theme="ember"] .note-box,
+html[data-theme="ember"] .meta-pill,
+html[data-theme="ember"] .soft-pill,
+html[data-theme="ember"] input[type="file"],
+html[data-theme="ember"] select,
+html[data-theme="ember"] .inline-form input[type="text"],
+html[data-theme="ember"] .manual-input,
+html[data-theme="ember"] .auth-card input[type="email"],
+html[data-theme="ember"] .auth-card input[type="password"],
+html[data-theme="ember"] .auth-card input[type="text"],
+html[data-theme="graphite"] .table-wrap,
+html[data-theme="graphite"] .note-box,
+html[data-theme="graphite"] .meta-pill,
+html[data-theme="graphite"] .soft-pill,
+html[data-theme="graphite"] input[type="file"],
+html[data-theme="graphite"] select,
+html[data-theme="graphite"] .inline-form input[type="text"],
+html[data-theme="graphite"] .manual-input,
+html[data-theme="graphite"] .auth-card input[type="email"],
+html[data-theme="graphite"] .auth-card input[type="password"],
+html[data-theme="graphite"] .auth-card input[type="text"] {
+  background: var(--input);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html[data-theme="solar"] .modern-table thead th,
+html[data-theme="ocean"] .modern-table thead th,
+html[data-theme="ember"] .modern-table thead th,
+html[data-theme="graphite"] .modern-table thead th {
+  background: color-mix(in srgb, var(--blue) 10%, transparent);
+  color: var(--muted);
+  border-bottom-color: var(--border);
+}
+
+html[data-theme="solar"] .modern-table tbody td,
+html[data-theme="ocean"] .modern-table tbody td,
+html[data-theme="ember"] .modern-table tbody td,
+html[data-theme="graphite"] .modern-table tbody td {
+  border-bottom-color: var(--border);
+}
+
+html[data-theme="solar"] .modern-table tbody tr:hover,
+html[data-theme="ocean"] .modern-table tbody tr:hover,
+html[data-theme="ember"] .modern-table tbody tr:hover,
+html[data-theme="graphite"] .modern-table tbody tr:hover {
+  background: color-mix(in srgb, var(--blue) 8%, transparent);
+}
+
+html[data-theme="solar"] .badge-blue,
+html[data-theme="solar"] .hero-badge,
+html[data-theme="ocean"] .badge-blue,
+html[data-theme="ocean"] .hero-badge,
+html[data-theme="ember"] .badge-blue,
+html[data-theme="ember"] .hero-badge,
+html[data-theme="graphite"] .badge-blue,
+html[data-theme="graphite"] .hero-badge {
+  background: color-mix(in srgb, var(--blue) 14%, transparent);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--blue) 26%, transparent);
+}
+
+html[data-theme="solar"] .btn-link,
+html[data-theme="solar"] .auth-card a,
+html[data-theme="solar"] .metric-highlight,
+html[data-theme="ocean"] .btn-link,
+html[data-theme="ocean"] .auth-card a,
+html[data-theme="ocean"] .metric-highlight,
+html[data-theme="ember"] .btn-link,
+html[data-theme="ember"] .auth-card a,
+html[data-theme="ember"] .metric-highlight,
+html[data-theme="graphite"] .btn-link,
+html[data-theme="graphite"] .auth-card a,
+html[data-theme="graphite"] .metric-highlight {
+  color: var(--blue);
+}

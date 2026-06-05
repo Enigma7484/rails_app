@@ -9,6 +9,7 @@
       (function () {
         try {
           var theme = localStorage.getItem("billsAgent.theme") || "terminal";
+          if (theme === "default") theme = "dark";
           var alpha = localStorage.getItem("billsAgent.panelAlpha") || "0.66";
           var blur = localStorage.getItem("billsAgent.blur") || "18";
           document.documentElement.dataset.theme = theme;

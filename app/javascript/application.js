@@ -9,14 +9,17 @@ const PANEL_ALPHA_KEY = "billsAgent.panelAlpha"
 const BLUR_KEY = "billsAgent.blur"
 
 function applyTheme(theme, alpha, blur) {
+  if (theme === "default") theme = "dark"
   document.documentElement.dataset.theme = theme
   document.documentElement.style.setProperty("--theme-panel-alpha", alpha)
   document.documentElement.style.setProperty("--theme-blur", `${blur}px`)
 }
 
 function currentThemeState() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || "terminal"
+
   return {
-    theme: localStorage.getItem(THEME_KEY) || "terminal",
+    theme: savedTheme === "default" ? "dark" : savedTheme,
     alpha: localStorage.getItem(PANEL_ALPHA_KEY) || "0.66",
     blur: localStorage.getItem(BLUR_KEY) || "18"
   }
