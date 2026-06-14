@@ -1,0 +1,182 @@
+<div class="page-container report-page">
+  <div class="page-topbar no-print">
+    <div>
+      <h1 class="page-title">Subscription Audit Report</h1>
+      <p class="page-subtitle">A decision-ready summary of recurring spend, upcoming charges, and cancellation candidates.</p>
+    </div>
+    <div class="inline-actions">
+      <button type="button" onclick="window.print()">Print Report</button>
+      <%= link_to "Back to Analysis", upload_path(@upload), class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="report-header">
+    <div>
+      <div class="hero-badge">PulsePilot AI Audit</div>
+      <h1 class="report-title">Recurring Spend Summary</h1>
+      <p class="page-subtitle">
+        Generated <%= Time.current.strftime("%Y-%m-%d %H:%M") %>
+        for upload #<%= @upload.id %>.
+      </p>
+    </div>
+    <div class="report-meta">
+      <div><strong>File:</strong> <%= @upload.file.attached? ? @upload.file.filename.to_s : "Manual entry" %></div>
+      <div><strong>Detected subscriptions:</strong> <%= @subscriptions.length %></div>
+      <div><strong>Upcoming next 30 days:</strong> <%= @upcoming_subscriptions.length %></div>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-title">Monthly Recurring Spend</div>
+      <div class="kpi-value">$<%= "%.2f" % @monthly_spend %></div>
+      <div class="kpi-subtext">Frequency-adjusted recurring total.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Annualized Spend</div>
+      <div class="kpi-value">$<%= "%.2f" % @annual_spend %></div>
+      <div class="kpi-subtext">Estimated yearly recurring cost.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Potential Savings</div>
+      <div class="kpi-value">$<%= "%.2f" % @potential_monthly_savings %></div>
+      <div class="kpi-subtext">$<%= "%.2f" % @potential_annual_savings %> annualized.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Cancelled Savings</div>
+      <div class="kpi-value">$<%= "%.2f" % @cancelled_monthly_savings %></div>
+      <div class="kpi-subtext">$<%= "%.2f" % @cancelled_annual_savings %> annualized.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="table-section-title">
+      <div>
+        <h2 class="section-title">Action Items</h2>
+        <p class="section-note">Subscriptions marked for cancellation or watchlist follow-up.</p>
+      </div>
+    </div>
+
+    <% if @action_items.any? %>
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Status</th>
+              <th>Monthly</th>
+              <th>Annual</th>
+              <th>Follow-up</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @action_items.sort_by { |s| [-s.monthly_amount, s.merchant_normalized.to_s] }.each do |subscription| %>
+              <tr>
+                <td class="merchant-cell">
+                  <strong><%= subscription.merchant %></strong>
+                  <div class="merchant-meta"><%= subscription.merchant_normalized %></div>
+                </td>
+                <td><span class="soft-pill"><%= subscription.status.humanize %></span></td>
+                <td>$<%= "%.2f" % subscription.monthly_amount %></td>
+                <td>$<%= "%.2f" % subscription.annual_amount %></td>
+                <td><%= subscription.next_check_date || subscription.next_expected || "-" %></td>
+                <td class="small-text"><%= subscription.cancellation_notes.presence || subscription.user_note.presence || "-" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="note-box">No cancel or watch decisions yet.</div>
+    <% end %>
+  </div>
+
+  <div class="section-card">
+    <div class="table-section-title">
+      <div>
+        <h2 class="section-title">Upcoming Charges</h2>
+        <p class="section-note">Expected recurring charges in the next 30 days.</p>
+      </div>
+    </div>
+
+    <% if @upcoming_subscriptions.any? %>
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Expected</th>
+              <th>Amount</th>
+              <th>Frequency</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @upcoming_subscriptions.each do |subscription| %>
+              <tr>
+                <td class="merchant-cell">
+                  <strong><%= subscription.merchant %></strong>
+                  <div class="merchant-meta"><%= subscription.merchant_normalized %></div>
+                </td>
+                <td><%= subscription.next_expected %></td>
+                <td>$<%= "%.2f" % subscription.avg_amount.to_f %></td>
+                <td><%= subscription.frequency %></td>
+                <td><span class="soft-pill"><%= subscription.status.humanize %></span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="note-box">No upcoming recurring charges found in the next 30 days.</div>
+    <% end %>
+  </div>
+
+  <div class="section-card">
+    <div class="table-section-title">
+      <div>
+        <h2 class="section-title">Full Recurring Charge Inventory</h2>
+        <p class="section-note">All detected recurring charges from this upload.</p>
+      </div>
+    </div>
+
+    <% if @subscriptions.any? %>
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Category</th>
+              <th>Frequency</th>
+              <th>Monthly</th>
+              <th>Annual</th>
+              <th>Next Expected</th>
+              <th>Confidence</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @subscriptions.sort_by { |s| [-s.monthly_amount, s.merchant_normalized.to_s] }.each do |subscription| %>
+              <tr>
+                <td class="merchant-cell">
+                  <strong><%= subscription.merchant %></strong>
+                  <div class="merchant-meta"><%= subscription.merchant_normalized %></div>
+                </td>
+                <td><%= subscription.category.presence || "Uncategorized" %></td>
+                <td><%= subscription.frequency.presence || "unknown" %></td>
+                <td>$<%= "%.2f" % subscription.monthly_amount %></td>
+                <td>$<%= "%.2f" % subscription.annual_amount %></td>
+                <td><%= subscription.next_expected || "-" %></td>
+                <td><%= subscription.confidence || "-" %></td>
+                <td><span class="soft-pill"><%= subscription.status.humanize %></span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="note-box">No recurring charges have been saved for this upload yet.</div>
+    <% end %>
+  </div>
+</div>

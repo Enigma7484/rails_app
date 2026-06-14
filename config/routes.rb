@@ -14,5 +14,6 @@ Rails.application.routes.draw do
 
   get "uploads/:id/export_subscriptions_csv", to: "uploads#export_subscriptions_csv", as: :export_subscriptions_csv
   get "uploads/:id/export_calendar", to: "uploads#export_calendar", as: :export_calendar
+  get "uploads/:id/audit_report", to: "uploads#audit_report", as: :audit_report_upload
   post "uploads/:id/enrich_subscriptions", to: "uploads#enrich_subscriptions", as: :enrich_subscriptions
 end

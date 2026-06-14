@@ -24,8 +24,20 @@
 
     <div class="kpi-card">
       <div class="kpi-title">Estimated Monthly Spend</div>
-      <div class="kpi-value">$<%= "%.2f" % total_monthly %></div>
-      <div class="kpi-subtext">Monthly recurring total across the current view.</div>
+      <div class="kpi-value">$<%= "%.2f" % (@estimated_monthly_spend || total_monthly) %></div>
+      <div class="kpi-subtext">$<%= "%.2f" % (@estimated_annual_spend || total_monthly.to_f * 12) %> annualized across the current view.</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Potential Savings</div>
+      <div class="kpi-value">$<%= "%.2f" % (@potential_monthly_savings || 0) %></div>
+      <div class="kpi-subtext">$<%= "%.2f" % (@potential_annual_savings || 0) %> annualized in cancel/watch decisions.</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Cancelled Savings</div>
+      <div class="kpi-value">$<%= "%.2f" % (@cancelled_monthly_savings || 0) %></div>
+      <div class="kpi-subtext">$<%= "%.2f" % (@cancelled_annual_savings || 0) %> annualized marked as cancelled.</div>
     </div>
 
     <div class="kpi-card">

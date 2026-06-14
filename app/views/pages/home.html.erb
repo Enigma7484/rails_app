@@ -1,16 +1,17 @@
 <div class="page-container">
   <div class="hero-card">
-    <div class="hero-badge">LangGraph + Rails + FastAPI</div>
-    <h1 class="hero-title">Detect recurring bills and subscriptions from CSV or PDF statements.</h1>
+    <div class="hero-badge">AI Subscription Audit</div>
+    <h1 class="hero-title">Find recurring charges, decide what to cancel, and stop surprise renewals.</h1>
     <p class="hero-subtitle">
-      Upload a statement, review parsed transactions, correct merchant names, recalculate recurring charges,
-      export to CSV or calendar, and enrich subscriptions with AI.
+      Upload a bank or card statement and turn messy transactions into a clean action plan with
+      monthly spend, annualized cost, cancellation candidates, renewal dates, and an exportable audit report.
     </p>
 
     <div class="button-row">
       <% if user_signed_in? %>
         <%= link_to "Go to Dashboard", uploads_path, class: "btn" %>
         <%= link_to "New Upload", new_upload_path, class: "btn-secondary" %>
+        <%= link_to "Try Demo Rows", new_manual_upload_path, class: "btn-secondary" %>
       <% else %>
         <%= link_to "Get Started", new_user_registration_path, class: "btn" %>
         <%= link_to "Sign In", new_user_session_path, class: "btn-secondary" %>
@@ -20,23 +21,23 @@
 
   <div class="feature-grid">
     <div class="feature-card">
-      <h3>Multi-format Ingestion</h3>
-      <p>Analyze both CSV files and text-based PDF statements.</p>
+      <h3>Statement-first audit</h3>
+      <p>Analyze CSV, Excel, PDF, or pasted transactions without connecting bank credentials.</p>
     </div>
 
     <div class="feature-card">
-      <h3>Human Review Loop</h3>
-      <p>Correct parsed merchant names and recalculate results instantly.</p>
+      <h3>Cancellation action plan</h3>
+      <p>Mark charges as keep, cancel, watch, ignored, or cancelled and track next follow-up.</p>
     </div>
 
     <div class="feature-card">
-      <h3>Actionable Output</h3>
-      <p>Export subscriptions to CSV or recurring calendar reminders.</p>
+      <h3>Savings report</h3>
+      <p>See monthly spend, annualized cost, potential savings, and cancelled savings.</p>
     </div>
 
     <div class="feature-card">
-      <h3>AI Enrichment</h3>
-      <p>Add categories and short descriptions using rules or LLM support.</p>
+      <h3>Renewal tracking</h3>
+      <p>Export recurring calendar reminders and share a clean audit report.</p>
     </div>
   </div>
 </div>

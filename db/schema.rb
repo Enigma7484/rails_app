@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_06_000200) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_14_000100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,6 +55,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_06_000200) do
   create_table "subscriptions", force: :cascade do |t|
     t.decimal "avg_amount"
     t.string "bill_type"
+    t.text "cancellation_notes"
+    t.string "cancellation_url"
+    t.date "cancelled_on"
     t.string "category"
     t.decimal "confidence"
     t.datetime "created_at", null: false
@@ -65,6 +68,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_06_000200) do
     t.date "last_paid"
     t.string "merchant"
     t.string "merchant_normalized"
+    t.date "next_check_date"
     t.date "next_expected"
     t.string "status", default: "detected", null: false
     t.datetime "updated_at", null: false

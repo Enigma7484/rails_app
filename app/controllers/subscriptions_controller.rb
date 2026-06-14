@@ -14,6 +14,13 @@ class SubscriptionsController < ApplicationController
   private
 
   def subscription_params
-    params.require(:subscription).permit(:status, :user_note)
+    params.require(:subscription).permit(
+      :status,
+      :user_note,
+      :cancellation_url,
+      :cancellation_notes,
+      :cancelled_on,
+      :next_check_date
+    )
   end
 end

@@ -25,6 +25,12 @@ class UploadsController < ApplicationController
     @frequency_counts = @subscriptions.group(:frequency).count.transform_keys { |k| k.presence || "Unknown" }
     @trend_by_upload_date = @subscriptions.joins(:upload).group("DATE(uploads.created_at)").sum(:avg_amount)
     @total_monthly = @subscriptions.where(frequency: "monthly").sum(:avg_amount)
+    @estimated_monthly_spend = @subscriptions.to_a.sum(&:monthly_amount)
+    @estimated_annual_spend = @estimated_monthly_spend * 12
+    @potential_monthly_savings = @subscriptions.to_a.select(&:savings_candidate?).sum(&:monthly_amount)
+    @potential_annual_savings = @potential_monthly_savings * 12
+    @cancelled_monthly_savings = @subscriptions.to_a.select(&:cancelled?).sum(&:monthly_amount)
+    @cancelled_annual_savings = @cancelled_monthly_savings * 12
     @total_count = @subscriptions.count
     @top_category = @category_spend.max_by { |_k, v| v }&.first
     @upcoming_subscriptions = @subscriptions
@@ -92,6 +98,24 @@ class UploadsController < ApplicationController
   def show
     @upload = current_user.uploads.find(params[:id])
     @persisted_subscriptions = @upload.subscriptions
+  end
+
+  def audit_report
+    @upload = current_user.uploads.find(params[:id])
+    @subscriptions = @upload.subscriptions.order(Arel.sql("next_expected ASC NULLS LAST"), :merchant_normalized)
+    @monthly_spend = @subscriptions.sum(&:monthly_amount)
+    @annual_spend = @monthly_spend * 12
+    @potential_monthly_savings = @subscriptions.select(&:savings_candidate?).sum(&:monthly_amount)
+    @potential_annual_savings = @potential_monthly_savings * 12
+    @cancelled_monthly_savings = @subscriptions.select(&:cancelled?).sum(&:monthly_amount)
+    @cancelled_annual_savings = @cancelled_monthly_savings * 12
+    @upcoming_subscriptions = @subscriptions.select do |subscription|
+      subscription.next_expected.present? &&
+        subscription.next_expected >= Date.current &&
+        subscription.next_expected <= 30.days.from_now.to_date &&
+        subscription.status != "ignored"
+    end
+    @action_items = @subscriptions.select { |subscription| subscription.status.in?(%w[cancel_candidate watchlist]) }
   end
 
   def destroy
@@ -351,7 +375,11 @@ class UploadsController < ApplicationController
     previous_statuses = upload.subscriptions.each_with_object({}) do |subscription, statuses|
       statuses[subscription_key(subscription)] = {
         status: subscription.status,
-        user_note: subscription.user_note
+        user_note: subscription.user_note,
+        cancellation_url: subscription.cancellation_url,
+        cancellation_notes: subscription.cancellation_notes,
+        cancelled_on: subscription.cancelled_on,
+        next_check_date: subscription.next_check_date
       }
     end
 
@@ -375,7 +403,11 @@ class UploadsController < ApplicationController
         evidence: sub["evidence"].is_a?(Hash) ? sub["evidence"].to_json : sub["evidence"],
         evidence_summary: sub["evidence_summary"],
         status: previous[:status] || "detected",
-        user_note: previous[:user_note]
+        user_note: previous[:user_note],
+        cancellation_url: previous[:cancellation_url],
+        cancellation_notes: previous[:cancellation_notes],
+        cancelled_on: previous[:cancelled_on],
+        next_check_date: previous[:next_check_date]
       )
     end
   end

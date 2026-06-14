@@ -14,6 +14,12 @@
   <% highest_subscription = subscriptions.max_by { |s| s["avg_amount"].to_f } %>
   <% next_upcoming = subscriptions.select { |s| s["next_expected"].present? }.min_by { |s| s["next_expected"] } %>
   <% persisted_by_key = (@persisted_subscriptions || []).index_by { |s| [s.merchant_normalized.to_s.downcase.strip, "%.2f" % s.avg_amount.to_f].join("|") } %>
+  <% persisted_subscriptions = (@persisted_subscriptions || []).to_a %>
+  <% estimated_monthly_spend = persisted_subscriptions.sum(&:monthly_amount) %>
+  <% estimated_annual_spend = estimated_monthly_spend * 12 %>
+  <% action_items = persisted_subscriptions.select { |s| s.status.in?(%w[cancel_candidate watchlist]) } %>
+  <% potential_monthly_savings = action_items.sum(&:monthly_amount) %>
+  <% cancelled_monthly_savings = persisted_subscriptions.select(&:cancelled?).sum(&:monthly_amount) %>
 
   <div class="page-topbar">
     <div>
@@ -53,6 +59,7 @@
       <%= button_to "Enrich with AI", enrich_subscriptions_path(@upload), method: :post, class: "btn btn-secondary" %>
       <%= link_to "Export CSV", export_subscriptions_csv_path(@upload), class: "btn btn-secondary" %>
       <%= link_to "Export Calendar (.ics)", export_calendar_path(@upload), class: "btn btn-secondary" %>
+      <%= link_to "Audit Report", audit_report_upload_path(@upload), class: "btn btn-secondary" %>
     </div>
   </div>
 
@@ -71,8 +78,20 @@
 
     <div class="kpi-card">
       <div class="kpi-title">Monthly Total</div>
-      <div class="kpi-value">$<%= "%.2f" % monthly_total %></div>
-      <div class="kpi-subtext">Estimated monthly recurring spend.</div>
+      <div class="kpi-value">$<%= "%.2f" % (persisted_subscriptions.any? ? estimated_monthly_spend : monthly_total) %></div>
+      <div class="kpi-subtext">$<%= "%.2f" % estimated_annual_spend %> annualized recurring spend.</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Potential Savings</div>
+      <div class="kpi-value">$<%= "%.2f" % potential_monthly_savings %></div>
+      <div class="kpi-subtext">Monthly value in cancel/watch decisions.</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Cancelled Savings</div>
+      <div class="kpi-value">$<%= "%.2f" % cancelled_monthly_savings %></div>
+      <div class="kpi-subtext">Monthly savings marked as cancelled.</div>
     </div>
 
     <div class="kpi-card">
@@ -96,6 +115,83 @@
         <div class="kpi-subtext">No upcoming charge available.</div>
       <% end %>
     </div>
+  </div>
+
+  <div class="section-card">
+    <div class="table-section-title">
+      <div>
+        <h2 class="section-title">Action Plan</h2>
+        <p class="section-note">Turn detected recurring charges into keep, cancel, watch, and follow-up decisions.</p>
+      </div>
+      <div class="pill-row">
+        <span class="soft-pill">$<%= "%.2f" % potential_monthly_savings %> monthly candidate savings</span>
+        <span class="soft-pill">$<%= "%.2f" % (potential_monthly_savings * 12) %> annual candidate savings</span>
+      </div>
+    </div>
+
+    <% if persisted_subscriptions.any? %>
+      <div class="table-wrap">
+        <table class="modern-table action-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Monthly Impact</th>
+              <th>Decision Workflow</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% persisted_subscriptions.sort_by { |s| [-s.monthly_amount, s.merchant_normalized.to_s] }.each do |subscription| %>
+              <tr>
+                <td class="merchant-cell">
+                  <strong><%= subscription.merchant %></strong>
+                  <div class="merchant-meta"><%= subscription.merchant_normalized %></div>
+                  <div class="merchant-meta"><%= subscription.category.presence || "Uncategorized" %> / <%= subscription.frequency.presence || "unknown" %></div>
+                </td>
+                <td>
+                  <strong>$<%= "%.2f" % subscription.monthly_amount %></strong>
+                  <div class="merchant-meta">$<%= "%.2f" % subscription.annual_amount %> yearly</div>
+                </td>
+                <td>
+                  <%= form_with model: subscription, local: true, html: { class: "table-edit-form" } do |form| %>
+                    <div class="form-grid">
+                      <div>
+                        <%= form.label :status, "Status", class: "small-text" %>
+                        <%= form.select :status,
+                              options_for_select(
+                                [["Keep", "keep"], ["Cancel candidate", "cancel_candidate"], ["Cancelled", "cancelled"], ["Watch", "watchlist"], ["Ignore", "ignored"], ["Detected", "detected"]],
+                                subscription.status
+                              ) %>
+                      </div>
+                      <div>
+                        <%= form.label :next_check_date, "Follow-up", class: "small-text" %>
+                        <%= form.date_field :next_check_date %>
+                      </div>
+                      <div>
+                        <%= form.label :cancelled_on, "Cancelled on", class: "small-text" %>
+                        <%= form.date_field :cancelled_on %>
+                      </div>
+                      <div>
+                        <%= form.label :cancellation_url, "Cancellation link", class: "small-text" %>
+                        <%= form.url_field :cancellation_url, placeholder: "https://..." %>
+                      </div>
+                      <div class="form-grid-wide">
+                        <%= form.label :cancellation_notes, "Notes", class: "small-text" %>
+                        <%= form.text_area :cancellation_notes, rows: 2, placeholder: "Phone number, confirmation code, or next step" %>
+                      </div>
+                    </div>
+                    <div class="button-row compact-row">
+                      <%= form.submit "Save Decision", class: "btn btn-secondary" %>
+                    </div>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="note-box">Run analysis to create an action plan from detected recurring charges.</div>
+    <% end %>
   </div>
 
   <div class="section-card">
@@ -227,8 +323,9 @@
                   <% if persisted_subscription %>
                     <div class="inline-actions">
                       <%= button_to "Confirm", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "confirmed" } }, class: "btn btn-secondary" %>
-                      <%= button_to "Ignore", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "ignored" } }, class: "btn btn-secondary" %>
+                      <%= button_to "Cancel", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "cancel_candidate", next_check_date: Date.current + 3.days } }, class: "btn btn-secondary" %>
                       <%= button_to "Watch", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "watchlist" } }, class: "btn btn-secondary" %>
+                      <%= button_to "Ignore", subscription_path(persisted_subscription), method: :patch, params: { subscription: { status: "ignored" } }, class: "btn btn-secondary" %>
                     </div>
                   <% else %>
                     <span class="small-text">Run analysis to save actions.</span>
