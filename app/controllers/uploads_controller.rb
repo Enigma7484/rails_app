@@ -102,7 +102,12 @@ class UploadsController < ApplicationController
 
   def audit_report
     @upload = current_user.uploads.find(params[:id])
-    @subscriptions = @upload.subscriptions.order(Arel.sql("next_expected ASC NULLS LAST"), :merchant_normalized)
+    @subscriptions = @upload.subscriptions.to_a.sort_by do |subscription|
+      [
+        subscription.next_expected || Date.new(9999, 12, 31),
+        subscription.merchant_normalized.to_s
+      ]
+    end
     @monthly_spend = @subscriptions.sum(&:monthly_amount)
     @annual_spend = @monthly_spend * 12
     @potential_monthly_savings = @subscriptions.select(&:savings_candidate?).sum(&:monthly_amount)
@@ -134,7 +139,7 @@ class UploadsController < ApplicationController
 
     filename = @upload.file.filename.to_s
     content_type = @upload.file.content_type || "text/csv"
-    tempfile = Tempfile.new([File.basename(filename, ".*"), File.extname(filename)])
+    tempfile = Tempfile.new([ File.basename(filename, ".*"), File.extname(filename) ])
     tempfile.binmode
     tempfile.write(@upload.file.download)
     tempfile.rewind
