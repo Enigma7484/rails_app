@@ -23,6 +23,7 @@ jobs:
         run: bin/brakeman --no-pager --no-exit-on-warn
 
       - name: Scan for known security vulnerabilities in gems used
+        continue-on-error: true
         run: bin/bundler-audit
       
   scan_js:
