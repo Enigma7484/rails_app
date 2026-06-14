@@ -6,8 +6,8 @@ Rails.application.routes.draw do
 
   get "uploads/manual/new", to: "uploads#new_manual", as: :new_manual_upload
   post "uploads/manual", to: "uploads#analyze_manual", as: :analyze_manual_upload
-  resources :uploads, only: [:index, :new, :create, :show, :destroy]
-  resources :subscriptions, only: [:update]
+  resources :uploads, only: [ :index, :new, :create, :show, :destroy ]
+  resources :subscriptions, only: [ :update ]
   post "uploads/:id/analyze", to: "uploads#analyze", as: :analyze_upload
   patch "uploads/:id/update_parsed_row/:row_index", to: "uploads#update_parsed_row", as: :update_parsed_row
   post "uploads/:id/recalculate", to: "uploads#recalculate", as: :recalculate_upload

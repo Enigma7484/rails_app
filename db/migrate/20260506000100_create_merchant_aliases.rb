@@ -8,6 +8,6 @@ class CreateMerchantAliases < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :merchant_aliases, [:user_id, :raw_name], unique: true
+    add_index :merchant_aliases, [ :user_id, :raw_name ], unique: true
   end
 end
