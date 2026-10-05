@@ -1,43 +1,63 @@
-<div class="page-container">
-  <div class="hero-card">
-    <div class="hero-badge">AI Subscription Audit</div>
-    <h1 class="hero-title">Find recurring charges, decide what to cancel, and stop surprise renewals.</h1>
-    <p class="hero-subtitle">
-      Upload a bank or card statement and turn messy transactions into a clean action plan with
-      monthly spend, annualized cost, cancellation candidates, renewal dates, and an exportable audit report.
-    </p>
-
-    <div class="button-row">
-      <% if user_signed_in? %>
-        <%= link_to "Go to Dashboard", uploads_path, class: "btn" %>
-        <%= link_to "New Upload", new_upload_path, class: "btn-secondary" %>
-        <%= link_to "Try Demo Rows", new_manual_upload_path, class: "btn-secondary" %>
-      <% else %>
-        <%= link_to "Get Started", new_user_registration_path, class: "btn" %>
-        <%= link_to "Sign In", new_user_session_path, class: "btn-secondary" %>
+<% content_for :title, "BillsAgent · Get a clear picture of recurring bills" %>
+<% content_for :head do %>
+  <meta name="description" content="Turn statements into a recurring-bill action plan. Review charges, track cancellation follow-ups, and export renewal reminders with BillsAgent.">
+<% end %>
+<% entry_path = user_signed_in? ? uploads_path : new_user_registration_path %>
+<% entry_label = user_signed_in? ? "Open my dashboard" : "Start my bill audit" %>
+<a class="intro-skip" href="#intro-main">Skip to content</a>
+<main id="intro-main" class="bill-intro" data-controller="intro">
+  <section class="bill-hero bill-width" aria-labelledby="hero-title">
+    <div class="bill-hero-copy">
+      <p class="bill-eyebrow"><span class="bill-dot"></span> Your money. Your next move.</p>
+      <h1 id="hero-title">Small charges.<br>Big picture.<br><span>Take control.</span></h1>
+      <p class="bill-lead">The subscription you forgot. The bill that keeps creeping up. Turn your statements into a clear view of what repeats—and a plan for what happens next.</p>
+      <div class="bill-actions"><%= link_to entry_path, class: "bill-primary" do %><%= entry_label %> <span aria-hidden="true">↗</span><% end %><a class="bill-text-link" href="#bill-tour">Explore the demo <span aria-hidden="true">↓</span></a></div>
+      <p class="bill-footnote">Statement-first. No bank login needed.</p>
+    </div>
+    <div class="bill-preview" aria-label="Fictional recurring bill dashboard preview">
+      <div class="bill-window-bar"><span><i></i><i></i><i></i></span><small>statement → clarity</small></div>
+      <div class="bill-preview-body">
+        <div class="bill-preview-heading"><span class="bill-eyebrow">Your recurring picture</span><span class="bill-label">Fictional sample · CAD</span></div>
+        <div class="bill-preview-total"><strong>$107.00</strong><span>estimated monthly spend<br>$1,284.00 annualized</span></div>
+        <div class="bill-chart" aria-hidden="true"><span style="--bar: 38%"></span><span style="--bar: 56%"></span><span style="--bar: 46%"></span><span style="--bar: 72%"></span><span style="--bar: 61%"></span><span style="--bar: 87%"></span><span style="--bar: 67%"></span><span style="--bar: 78%"></span><span style="--bar: 53%"></span><span style="--bar: 69%"></span><span style="--bar: 48%"></span><span style="--bar: 58%"></span></div>
+        <div class="bill-sample-row"><span class="bill-merchant">S</span><div><strong>Streamly</strong><small>Entertainment · Monthly</small></div><strong>$18.00</strong><span class="bill-status">Review</span></div>
+        <div class="bill-sample-row"><span class="bill-merchant">C</span><div><strong>Cloudnest</strong><small>Storage · Monthly</small></div><strong>$9.00</strong><span class="bill-status">Keep</span></div>
+        <div class="bill-sample-row"><span class="bill-merchant">H</span><div><strong>Homewave</strong><small>Internet · Monthly</small></div><strong>$80.00</strong><span class="bill-status">Watch</span></div>
+      </div>
+      <div class="bill-preview-callout"><span aria-hidden="true">↗</span><div><strong>A decision worth $216 a year.</strong><small>Streamly, if you choose to cancel. An estimate, not a guarantee.</small></div></div>
+    </div>
+  </section>
+  <div class="bill-workflow bill-width" aria-label="How BillsAgent works"><span><b>01</b> Bring your statement</span><span><b>02</b> Review what repeats</span><span><b>03</b> Make your next move</span></div>
+  <section id="bill-tour" class="bill-tour bill-width" aria-labelledby="tour-title">
+    <div class="bill-section-heading"><p class="bill-eyebrow">From “what is this charge?” to “handled.”</p><h2 id="tour-title">Meet your bill review workflow.</h2><p>Try the small decisions that add up. Every example below uses fictional data.</p></div>
+    <div class="bill-tabs" role="tablist" aria-label="Explore BillsAgent" data-intro-target="tabs" hidden>
+      <% ["Find recurring bills", "Check the evidence", "Plan your savings", "Stay ahead"].each_with_index do |label, index| %>
+        <button type="button" role="tab" id="bill-tab-<%= index %>" aria-controls="bill-panel-<%= index %>" aria-selected="<%= index == 0 %>" tabindex="<%= index == 0 ? 0 : -1 %>" data-intro-target="tab" data-action="click->intro#select keydown->intro#navigate" data-index="<%= index %>"><span aria-hidden="true">0<%= index + 1 %></span> <%= label %></button>
       <% end %>
     </div>
-  </div>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <h3>Statement-first audit</h3>
-      <p>Analyze CSV, Excel, PDF, or pasted transactions without connecting bank credentials.</p>
+    <div class="bill-tour-panel" id="bill-panel-0" data-intro-target="panel">
+      <div class="bill-tour-copy"><p class="bill-eyebrow">01 / Start with what you have</p><h3>Messy statement.<br>Clear starting point.</h3><p>Upload CSV, Excel, or a text-based PDF. Or paste transaction rows. BillsAgent looks for repeat charges and estimates their frequency and next charge date.</p><p class="bill-detail">CSV and Excel give the best accuracy. Review the results before acting.</p><%= link_to "Bring my statement →", new_upload_path, class: "bill-text-link" %></div>
+      <div class="bill-demo"><div class="bill-demo-bar"><strong>Transaction review</strong><span>Interactive · Fictional CAD data</span></div><div class="bill-demo-body"><p class="bill-demo-kicker">sample-statement.csv</p><h4>A pattern hiding in plain sight.</h4><div class="bill-transactions"><div><time>Apr 03, 2026</time><strong>STREAMLY PLUS</strong><span>$18.00</span></div><div><time>May 03, 2026</time><strong>STREAMLY PLUS</strong><span>$18.00</span></div><div><time>Jun 03, 2026</time><strong>STREAMLY PLUS</strong><span>$18.00</span></div></div><div class="bill-result" data-intro-target="detection" hidden><strong>↻ Streamly · Monthly</strong><p>3 matching charges, about 30 days apart. Estimated next charge: July 3, 2026.</p></div><button type="button" class="bill-demo-button" data-action="intro#detect" aria-expanded="false" aria-controls="sample-detection">Find the recurring pattern <span aria-hidden="true">↗</span></button></div></div>
     </div>
-
-    <div class="feature-card">
-      <h3>Cancellation action plan</h3>
-      <p>Mark charges as keep, cancel, watch, ignored, or cancelled and track next follow-up.</p>
+    <div class="bill-tour-panel" id="bill-panel-1" data-intro-target="panel">
+      <div class="bill-tour-copy"><p class="bill-eyebrow">02 / Trust, then verify</p><h3>See the evidence.<br>Make it yours.</h3><p>Check extracted transactions, parsing notes, and confidence. Correct a merchant name or row, then recalculate the analysis. Saved merchant aliases help make future reviews cleaner.</p><p class="bill-detail">Optional AI enrichment adds categories and explanations when a provider is configured; fallback rules are available.</p><%= link_to "Try pasted transactions →", new_manual_upload_path, class: "bill-text-link" %></div>
+      <div class="bill-demo"><div class="bill-demo-bar"><strong>Evidence & corrections</strong><span>Interactive · Fictional CAD data</span></div><div class="bill-demo-body"><p class="bill-demo-kicker">One charge, three occurrences</p><h4>Recognize the merchant?</h4><div class="bill-evidence"><span>Raw description</span><code>CLDNEST*STORAGE 0042</code><span>Evidence</span><strong>$9.00 · Apr 8, May 8, Jun 8, 2026</strong></div><label class="bill-field-label" for="sample-merchant">Correct the sample merchant name</label><input id="sample-merchant" class="bill-demo-input" type="text" value="Cloudnest" maxlength="60" data-intro-target="merchant"><button type="button" class="bill-demo-button" data-action="intro#correct">Apply sample correction <span aria-hidden="true">↗</span></button><p class="bill-feedback" data-intro-target="correction" role="status"></p></div></div>
     </div>
-
-    <div class="feature-card">
-      <h3>Savings report</h3>
-      <p>See monthly spend, annualized cost, potential savings, and cancelled savings.</p>
+    <div class="bill-tour-panel" id="bill-panel-2" data-intro-target="panel">
+      <div class="bill-tour-copy"><p class="bill-eyebrow">03 / A plan you can follow through on</p><h3>Keep what matters.<br>Question the rest.</h3><p>Mark bills as keep, cancel candidate, watchlist, ignored, or cancelled. Add cancellation notes, links, and a next-check date. See potential savings separately from bills you’ve marked cancelled.</p><p class="bill-detail">You cancel with the merchant yourself. BillsAgent helps track the follow-up; it does not cancel accounts for you.</p><%= link_to "Open my action plan →", uploads_path, class: "bill-text-link" %></div>
+      <div class="bill-demo"><div class="bill-demo-bar"><strong>Cancellation action plan</strong><span>Interactive · Fictional CAD data</span></div><div class="bill-demo-body"><div class="bill-sample-row"><span class="bill-merchant">S</span><div><strong>Streamly</strong><small>$18.00 CAD / month · Entertainment</small></div></div><label class="bill-field-label" for="sample-decision">What would you do with this bill?</label><select id="sample-decision" class="bill-demo-input" data-action="change->intro#decide" data-intro-target="decision"><option value="keep">Keep</option><option value="cancel_candidate">Cancel candidate</option><option value="watchlist">Watchlist</option><option value="ignored">Ignored</option><option value="cancelled">Cancelled</option></select><div class="bill-savings-grid"><div><small>Potential / month</small><strong data-intro-target="potential">$0.00</strong></div><div><small>Marked cancelled / month</small><strong data-intro-target="cancelled">$0.00</strong></div></div><p class="bill-feedback" data-intro-target="decisionFeedback" role="status">Keep: included in your recurring picture.</p><p class="bill-detail">Annualized amounts assume the monthly charge stays the same. No real bill is changed in this demo.</p></div></div>
     </div>
-
-    <div class="feature-card">
-      <h3>Renewal tracking</h3>
-      <p>Export recurring calendar reminders and share a clean audit report.</p>
+    <div class="bill-tour-panel" id="bill-panel-3" data-intro-target="panel">
+      <div class="bill-tour-copy"><p class="bill-eyebrow">04 / Give your future self a heads-up</p><h3>Know what’s next.<br>Take the plan with you.</h3><p>See upcoming expected charges on your dashboard. Export a recurring calendar reminder, download subscription data as CSV, or print a clean audit report.</p><p class="bill-detail">Charge dates are estimates from past transactions. Calendar reminders are exported to your calendar, not sent as automatic alerts.</p><%= link_to "See my dashboard →", uploads_path, class: "bill-text-link" %></div>
+      <div class="bill-demo"><div class="bill-demo-bar"><strong>Upcoming charges</strong><span>Interactive · Fictional CAD data</span></div><div class="bill-demo-body"><p class="bill-demo-kicker">Sample forecast · July 2026</p><h4>A little less surprise.</h4><div class="bill-calendar-row"><span><b>03</b> JUL</span><div><strong>Streamly · $18.00</strong><small>Expected monthly charge</small></div></div><div class="bill-calendar-row"><span><b>08</b> JUL</span><div><strong>Cloudnest · $9.00</strong><small>Expected monthly charge</small></div></div><button type="button" class="bill-demo-button" data-action="intro#calendar" aria-expanded="false" aria-controls="sample-calendar">Preview a calendar reminder <span aria-hidden="true">↗</span></button><div id="sample-calendar" class="bill-result" data-intro-target="calendar" hidden><strong>Streamly renewal · July 3, 2026</strong><p>Repeats monthly. Estimated charge: $18.00 CAD. This is a preview; nothing has been added to your calendar.</p></div></div></div>
     </div>
-  </div>
-</div>
+    <noscript><p class="bill-detail">Enable JavaScript to try the examples. You can still read every workflow and open the app.</p></noscript>
+    <p class="bill-tour-note">A safe place to explore. Demo changes stay on this page and reset when you leave.</p>
+  </section>
+  <section class="bill-boundaries bill-width" aria-label="Capabilities and limitations">
+    <article><span class="bill-eyebrow">Available today</span><h3>Your review, from start to follow-up.</h3><p>Statement uploads, pasted rows, recurring detection, editable transactions, a saved dashboard, cancellation tracking, CSV and calendar exports, and a printable audit report.</p></article>
+    <article><span class="bill-eyebrow">Planned capability</span><h3>Scanned statements need another step.</h3><p>OCR for image-only PDFs is planned and is not available today. Use a CSV, Excel export, or text-based PDF to get started. Bank connections and automatic cancellations are not offered.</p></article>
+  </section>
+  <section class="bill-closing" aria-labelledby="closing-title"><div class="bill-width"><p class="bill-eyebrow">A clearer picture starts with one statement</p><h2 id="closing-title">Make room for what matters.</h2><p>Know what you’re paying for. Decide what deserves to stay.</p><%= link_to entry_path, class: "bill-primary" do %><%= entry_label %> <span aria-hidden="true">↗</span><% end %><small><%= user_signed_in? ? "Pick up where you left off, or start a new upload." : "Create an account to save your uploads and review decisions." %></small></div></section>
+</main>
+<footer class="bill-footer bill-width"><%= link_to "BillsAgent ↗", intro_path %><p>Less guesswork. More control.</p><nav aria-label="Footer"><%= link_to "Appearance", settings_path %><%= link_to(user_signed_in? ? "Dashboard" : "Sign in", user_signed_in? ? uploads_path : new_user_session_path) %><a href="#intro-main">Back to top ↑</a></nav></footer>
